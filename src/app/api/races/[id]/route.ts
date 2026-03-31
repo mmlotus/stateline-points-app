@@ -58,7 +58,7 @@ export async function PATCH(
         const current = existing[0];
 
         const nextStatus = status ?? current.status;
-        const allowedStatuses = ["scheduled", "completed", "skipped"];
+        const allowedStatuses = ["scheduled", "completed", "rain out", "cancelled"];
 
         if (!allowedStatuses.includes(nextStatus)) {
             return NextResponse.json(

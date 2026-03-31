@@ -404,6 +404,15 @@ export default function EventResultsPage() {
             }
 
             setRaceResults(json || []);
+
+            setRaces((prev) =>
+                prev.map((race) =>
+                    race.id === selectedRaceId
+                        ? { ...race, status: "completed" }
+                        : race
+                )
+            );
+            
             toast.success("Results saved!");
         } catch (error) {
             console.error(error);
@@ -687,6 +696,7 @@ export default function EventResultsPage() {
                                                                         type="checkbox"
                                                                         checked={row.dns}
                                                                         onChange={(e) => updateResultField(row.entry_id, "dns", e.target.checked)}
+                                                                        title="DNS"
                                                                     />
                                                                 </td>
                                                                 <td>
@@ -694,6 +704,7 @@ export default function EventResultsPage() {
                                                                         type="checkbox"
                                                                         checked={row.dnf}
                                                                         onChange={(e) => updateResultField(row.entry_id, "dnf", e.target.checked)}
+                                                                        title="DNF"
                                                                     />
                                                                 </td>
                                                                 <td>
@@ -701,6 +712,7 @@ export default function EventResultsPage() {
                                                                         type="checkbox"
                                                                         checked={row.dq}
                                                                         onChange={(e) => updateResultField(row.entry_id, "dq", e.target.checked)}
+                                                                        title="DQ"
                                                                     />
                                                                 </td>
                                                                 <td>
@@ -708,6 +720,7 @@ export default function EventResultsPage() {
                                                                         type="checkbox"
                                                                         checked={row.bf}
                                                                         onChange={(e) => updateResultField(row.entry_id, "bf", e.target.checked)}
+                                                                        title="BF"
                                                                     />
                                                                 </td>
                                                                 <td>

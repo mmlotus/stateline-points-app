@@ -183,6 +183,12 @@ export async function PUT(req: Request) {
                 `;
             }
 
+            await sql`
+                UPDATE races
+                SET status = 'completed'
+                WHERE id = ${race_id}
+            `;
+
             const savedRows = await sql`
                 SELECT
                     r.id,
