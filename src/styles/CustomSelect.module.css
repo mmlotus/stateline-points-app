@@ -1,0 +1,69 @@
+.customSelect {
+  position: relative;
+  min-width: 180px;
+}
+
+.customSelectTrigger,
+.customSelectTrigger2 {
+  width: auto;
+  padding: 0.6rem 0.75rem;
+  margin-right: 1rem;
+  background: var(--text);
+  color: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customSelectTrigger2 {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.customSelectMenu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  min-width: 100%;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  z-index: 2000;
+  overflow: hidden;
+}
+
+.customSelectItem {
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.customSelectItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.activeItem {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.createItem {
+  border-top: 1px solid var(--border);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+.chevron {
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}

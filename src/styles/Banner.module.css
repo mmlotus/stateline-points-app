@@ -1,0 +1,35 @@
+.banner {
+  position: relative;
+  width: 100%;
+  height: var(--banner-height, 200px);
+  overflow: hidden;
+}
+
+.bannerImage {
+  object-fit: cover;
+  opacity: 0.5;
+  filter: blur(1px);
+}
+
+.bannerContent {
+  position: absolute;
+  top: 50%;
+  left: 2rem;
+  transform: translateY(-50%);
+  color: #000;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.subtitle {
+  font-size: 1.3rem;
+  font-weight: 400;
+  margin-bottom: 2rem;
+  color: var(--text);
+}

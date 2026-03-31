@@ -1,42 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #ffffff;
+  --bg-alt: #f9f9f9;
+  --text: #111111;
+  --text-muted: #555;
+  --border: #ddd;
+  --border-light: #eee;
+
+  --btn-primary: #222;
+  --btn-secondary: #888;
+
+  --brand-gold: #cf920e;
+  --brand-gold-transp: #cf920e52;
+
+  --tag-purple: #6f42c1;
+  --tag-green: #28a745;
+  --tag-blue: #4b8185;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #222;
+    --bg-alt: #1a1a1a;
+    --text: #f5f5f5;
+    --text-muted: #aaa;
+    --border: #444;
+    --border-light: #555;
+
+    --btn-primary: #f5f5f5;
+    --btn-secondary: #666;
+
+    --brand-gold: #cf920e;
+    --brand-gold-transp: #ffd884b9;
+
+    --tag-purple: #a18dc7;
+    --tag-green: #72af80;
+    --tag-blue: #6b9194;
   }
 }
 
+/* --- Sticky footer layout --- */
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
+  height: 100%;
   margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-poppins, "Poppins", sans-serif);
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+main.content {
+  flex: 1;
 }

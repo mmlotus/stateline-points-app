@@ -1,0 +1,651 @@
+/* ====== BACKGROUND ====== */
+.landing {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem;
+}
+
+/* ====== WRAPPER ====== */
+.card {
+    background: var(--bg);
+    backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 75%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.pageForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%;
+    margin: 0 auto;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.delivery-card-container {
+    position: relative;
+}
+
+.delivery-card {
+    margin-top: 32px;
+    padding: 20px;
+    border-radius: 10px;
+    background: var(--bg);
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+}
+
+.deliveryAddressHeader {
+    display: inline-block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    margin-bottom: 10px;
+    background: var(--brand-gold-transp);
+    color: var(--bg);
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+}
+
+.group {
+    display: grid;
+}
+
+.gap-xs {
+    gap: .25rem;
+}
+
+.gap-sm {
+    gap: .5rem;
+}
+
+.gap-md {
+    gap: 1rem;
+}
+
+/* ====== TABLES ====== */
+.tableWrapper {
+    display: grid;
+    grid-template-columns: 2fr 3fr 1fr 0.8fr 0.8fr;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.tableHeader,
+.tableRow {
+    display: contents;
+}
+
+.tableHeader div {
+    background: var(--bg-alt);
+    font-weight: 600;
+    color: var(--text);
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.tableRow div {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+    color: var(--text);
+}
+
+.tableRow div:last-child,
+.tableHeader div:last-child {
+    border-right: none;
+}
+
+.tableRow:last-of-type div {
+    border-bottom: none;
+}
+
+.tableRow input[type="number"] {
+    width: 60px;
+    text-align: center;
+    padding: 4px 6px;
+    text-align: center;
+    font-size: 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* ====== HEADINGS ====== */
+.heading {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--text);
+}
+
+.subheading {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-top: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.samplePrompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 50vh;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    color: var(--text);
+}
+
+/* ====== ROW & LAYOUT ====== */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.half {
+    flex: 1 1 48%;
+}
+
+.third {
+    flex: 1 1 30%;
+}
+
+.row>.formField.third {
+    max-width: 30%;
+}
+
+.full {
+    flex: 1 1 100%;
+}
+
+/* ====== FORM FIELDS ====== */
+.formField {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: 500;
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.input,
+.select,
+.file {
+    padding: 0.6rem 0.75rem;
+    background-color: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    width: 100%;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selSeas {
+    padding: 0.6rem 0.75rem;
+    margin-right: 1rem;
+    background-color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--bg);
+    width: auto !important;
+    min-width: 180px;
+    font-size: 0.8rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selSeas option {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.input:focus,
+.select:focus,
+.selSeas:focus {
+    outline: none;
+    border-color: var(--btn-primary);
+    box-shadow: 0 0 0 3px rgba(51, 51, 51, 0.1);
+}
+
+.textarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--bg-alt);
+}
+
+/* ====== BUTTONS ====== */
+.buttonRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.actionsLeft {
+    flex: 1;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.button,
+.buttonSecondary {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.button {
+    background: var(--btn-primary);
+    color: var(--bg);
+}
+
+.buttonSecondary {
+    background: var(--bg);
+    color: var(--btn-primary);
+}
+
+.button:hover {
+    background: var(--brand-gold);
+}
+
+.buttonSecondary:hover {
+    background: var(--btn-primary);
+    color: var(--bg);
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.removeIconButton {
+    background: none;
+    border: none;
+    padding: 0;
+    margin-left: auto;
+    color: var(--btn-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: right;
+}
+
+.removeIconButton:hover {
+    color: #b91c1c;
+}
+
+/* ====== RADIO BUTTONS ====== */
+.radioGroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.radioOption {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.95rem;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease-in-out;
+}
+
+.radioOption input[type="radio"] {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    background-color: var(--bg);
+    flex-shrink: 0;
+}
+
+.radioOption input[type="radio"]:checked {
+    border-color: var(--brand-gold);
+    background-color: var(--bg);
+    box-shadow: inset 0 0 0 3px var(--text-muted);
+}
+
+.radioOption:hover input[type="radio"] {
+    border-color: var(--brand-gold-transp);
+}
+
+.radioOption:hover {
+    color: var(--brand-gold-transp);
+}
+
+/* ====== ATTACHMENTS ====== */
+.photoRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    align-items: center;
+}
+
+.photoSlot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 150px;
+    max-width: 250px;
+}
+
+.photoLabel {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+}
+
+.photoLabel:hover {
+    background: var(--brand-gold);
+    color: var(--bg);
+}
+
+.photoLabel.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--bg-alt);
+    border-color: var(--border);
+    color: var(--text-muted);
+}
+
+.photoLabel.disabled:hover {
+    background: var(--bg-alt);
+    color: var(--text-muted);
+}
+
+.fileName {
+    flex: 1;
+    margin-top: 4px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+/* ====== MEDIA CONSTRAINTS ====== */
+@media (max-width: 768px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .half,
+    .third,
+    .full {
+        flex: 1 1 100%;
+    }
+
+    .subheading,
+    .label,
+    .input {
+        color: var(--text) !important;
+    }
+
+    .productCard {
+        width: 100%;
+    }
+}
+
+/* ====== PRODUCT CARDS ====== */
+.productGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.25rem;
+    padding: 2rem;
+}
+
+.productCard {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    color: var(--text);
+}
+
+.flexSpacer {
+    flex-grow: 1;
+}
+
+.cardRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.2rem;
+}
+
+.leftColumn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.productName {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text);
+}
+
+.productImage {
+    width: 80px;
+    height: 80px;
+    margin-left: 1rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+}
+
+.productImage img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.detailsRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.2rem;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.productSku {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.productPrice {
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--text);
+}
+
+.bottomRow {
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 60px;
+    margin-top: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.qtyWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.addWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.txtWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 14px;
+}
+
+.qtyControls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.qtyControls button {
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+}
+
+.qtyControls button:hover {
+    color: var(--brand-gold);
+}
+
+.qtyControls span {
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.2rem;
+    text-align: center;
+}
+
+.addButton {
+    background: var(--text);
+    color: var(--bg);
+    padding: 0.4rem 0.9rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.addButton:disabled {
+    background: var(--border);
+    cursor: not-allowed;
+}
+
+/* ====== CART ====== */
+.cartFloatButton {
+    position: fixed;
+    bottom: 7rem;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--text);
+    color: var(--bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    transition: background 0.2s ease;
+}
+
+.cartFloatButton:hover {
+    background-color: var(--brand-gold);
+}
+
+.cartBadge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--brand-gold);
+    color: var(--text);
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.cartBadge:hover {
+    background-color: var(--text);
+    color: var(--bg);
+}
+
+.cartText {
+    color: var(--text);
+    font-size: 12px;
+    padding: 2px;
+    margin-top: 2px;
+    line-height: 1.2;
+}
