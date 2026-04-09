@@ -17,10 +17,6 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import RaceEditor from "@/components/Editors/RaceEditor";
 import { formatDate } from "@/components/Formatter";
 
-function isoDate(value: string) {
-    return (value || "").slice(0, 10);
-}
-
 export default function EventRacesPage() {
     const router = useRouter();
     const params = useParams<{ seasonId: string; id: string }>();
@@ -153,7 +149,7 @@ export default function EventRacesPage() {
             setRacesByGroup({});
         }
     }, [selectedEventClassId]);
-    
+
     async function handleSave(payload: RaceEditorSavePayload) {
         const tId = toast.loading("Saving races...");
 
@@ -275,6 +271,7 @@ export default function EventRacesPage() {
                                 status: race.status,
                                 notes: race.notes,
                                 order_index: race.order_index ?? i,
+                                transfer_count: race.transfer_count ?? 0,
                             }),
                         });
 
@@ -294,6 +291,7 @@ export default function EventRacesPage() {
                                 status: race.status,
                                 notes: race.notes,
                                 order_index: race.order_index ?? i,
+                                transfer_count: race.transfer_count ?? 0,
                             }),
                         });
 
@@ -324,12 +322,12 @@ export default function EventRacesPage() {
     return (
         <div className={custStyles.wrap}>
             <div className={custStyles.header}>
-                <h1 className={styles.heading}>
-                    Races for{" "}
-                    {(isoDate(formatDate(eventData?.event_date || "") || "")) ||
-                        eventData?.name ||
-                        "Event"}
-                </h1>
+                <h1 className={styles.heading}>Manage Races</h1>
+                {eventData && (
+                    <div className={styles.muted}>
+                        {eventData.name} - {formatDate(eventData.event_date)}
+                    </div>
+                )}
 
                 <div className={custStyles.tools}>
                     <button

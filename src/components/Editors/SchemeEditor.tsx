@@ -49,6 +49,8 @@ function breakdownLabel(t: SchemeBreakdownType) {
             return "Qualifying";
         case "heat":
             return "Heat";
+        case "d_feature":
+            return "D Main";
         case "c_feature":
             return "C Main";
         case "b_feature":
@@ -70,6 +72,8 @@ function prettyTransferRaceLabel(t: SchemeBreakdownType) {
     switch (t) {
         case "heat":
             return "Heat";
+        case "d_feature":
+            return "D Main";
         case "c_feature":
             return "C Main";
         case "b_feature":
@@ -82,12 +86,14 @@ function prettyTransferRaceLabel(t: SchemeBreakdownType) {
 }
 
 function getTransferOptionsForBreakdown(bType: SchemeBreakdownType): TransferExclusionRace[] {
-    if (bType === "a_feature") return ["heat", "c_feature", "b_feature"];
+    if (bType === "a_feature") return ["heat", "d_feature", "c_feature", "b_feature"];
 
     switch (bType) {
         case "qualifying":
-            return ["heat", "c_feature", "b_feature", "a_feature"];
+            return ["heat", "d_feature", "c_feature", "b_feature", "a_feature"];
         case "heat":
+            return ["d_feature", "c_feature", "b_feature", "a_feature"];
+        case "d_feature":
             return ["c_feature", "b_feature", "a_feature"];
         case "c_feature":
             return ["b_feature", "a_feature"];
@@ -130,7 +136,7 @@ export default function SchemeEditor({ initialData, onSave }: Props) {
     );
 
     const breakdownOrder: SchemeBreakdownType[] = useMemo(
-        () => ["qualifying", "heat", "c_feature", "b_feature", "a_feature"],
+        () => ["qualifying", "heat", "d_feature", "c_feature", "b_feature", "a_feature"],
         []
     );
 
@@ -388,7 +394,7 @@ export default function SchemeEditor({ initialData, onSave }: Props) {
 
         if (!continuousFeaturePoints) return breakdowns;
 
-        return breakdowns.filter((b) => b.type !== "b_feature" && b.type !== "c_feature");
+        return breakdowns.filter((b) => b.type !== "b_feature" && b.type !== "c_feature" && b.type !== "d_feature");
     }, [type, breakdowns, continuousFeaturePoints, payShowBMain]);
 
     const isPoints = type === "points";

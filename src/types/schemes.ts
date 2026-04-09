@@ -34,6 +34,7 @@ export type ResultModifier = {
 export type SchemeBreakdownType =
   | "qualifying"
   | "heat"
+  | "d_feature"
   | "c_feature"
   | "b_feature"
   | "a_feature";
@@ -75,7 +76,7 @@ export type EditableSchemeLine = {
   value: number | "";
 };
 
-export type TransferExclusionRace = "heat" | "c_feature" | "b_feature" | "a_feature";
+export type TransferExclusionRace = "heat" | "d_feature" | "c_feature" | "b_feature" | "a_feature";
 
 export type EditableBreakdown = Omit<SchemeBreakdown, "id" | "scheme_id"> & {
   id?: string;

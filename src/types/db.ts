@@ -200,6 +200,7 @@ export type Race = {
     status: RaceStatus;
     notes?: string | null;
     order_index: number;
+    transfer_count: number;
     created_at: string;
 };
 
@@ -231,6 +232,7 @@ export type ResultRow = {
     dnf: boolean;
     dq: boolean;
     bf: boolean;
+    transferred: boolean;
     notes: string | null;
     created_at: string;
 };
@@ -263,6 +265,7 @@ export type ResultInput = {
     dnf: boolean;
     dq: boolean;
     bf: boolean;
+    transferred: boolean;
     notes?: string | null;
 };
 

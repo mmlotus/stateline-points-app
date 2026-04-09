@@ -269,6 +269,7 @@ export default function EventResultsPage() {
                 dnf: false,
                 dq: false,
                 bf: false,
+                transferred: false,
                 notes: null,
                 created_at: new Date().toISOString(),
 
@@ -292,10 +293,12 @@ export default function EventResultsPage() {
                 is_active: entry.is_active,
             };
 
-            return [...prev, nextRow].map((row, index) => ({
+            const nextRows = [...prev, nextRow].map((row, index) => ({
                 ...row,
                 finish_position: index + 1,
             }));
+
+            return applyAutoTransfers(nextRows);
         });
     }
 
@@ -336,26 +339,31 @@ export default function EventResultsPage() {
             const [draggedRow] = next.splice(draggedIndex, 1);
             next.splice(targetIndex, 0, draggedRow);
 
-            return next.map((row, index) => ({
+            const reindexed = next.map((row, index) => ({
                 ...row,
                 finish_position: index + 1,
             }));
+
+            return applyAutoTransfers(reindexed);
         });
     }
 
     function removeResult(entryId: string) {
-        setRaceResults((prev) =>
-            prev.filter((row) => row.entry_id !== entryId)
+        setRaceResults((prev) => {
+            const nextRows = prev
+                .filter((row) => row.entry_id !== entryId)
                 .map((row, index) => ({
                     ...row,
                     finish_position: index + 1,
-                }))
-        );
+                }));
+
+            return applyAutoTransfers(nextRows);
+        });
     }
 
     function updateResultField(
         entryId: string,
-        field: "dns" | "dnf" | "dq" | "bf" | "notes",
+        field: "dns" | "dnf" | "dq" | "bf" | "transferred" | "notes",
         value: boolean | string
     ) {
         setRaceResults((prev) =>
@@ -368,6 +376,16 @@ export default function EventResultsPage() {
                     : row
             )
         );
+    }
+
+    function applyAutoTransfers(rows: ResultWithDetails[], raceId?: string) {
+        const race = races.find((r) => r.id === (raceId ?? selectedRaceId));
+        const transferCount = Math.max(0, Number(race?.transfer_count ?? 0));
+
+        return rows.map((row, index) => ({
+            ...row,
+            transferred: transferCount > 0 ? index < transferCount : false,
+        }));
     }
 
     async function handleSaveResults() {
@@ -387,6 +405,7 @@ export default function EventResultsPage() {
                     dnf: row.dnf,
                     dq: row.dq,
                     bf: row.bf,
+                    transferred: row.transferred,
                     notes: row.notes ?? null,
                 })),
             };
@@ -412,7 +431,7 @@ export default function EventResultsPage() {
                         : race
                 )
             );
-            
+
             toast.success("Results saved!");
         } catch (error) {
             console.error(error);
@@ -654,6 +673,7 @@ export default function EventResultsPage() {
                                                             <th style={{ width: 70 }}>DNF</th>
                                                             <th style={{ width: 70 }}>DQ</th>
                                                             <th style={{ width: 70 }}>BF</th>
+                                                            <th style={{ width: 70 }}>Transfer?</th>
                                                             <th style={{ width: 500 }}>Notes</th>
                                                             <th style={{ width: 90 }}></th>
                                                         </tr>
@@ -721,6 +741,14 @@ export default function EventResultsPage() {
                                                                         checked={row.bf}
                                                                         onChange={(e) => updateResultField(row.entry_id, "bf", e.target.checked)}
                                                                         title="BF"
+                                                                    />
+                                                                </td>
+                                                                <td>
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={row.transferred}
+                                                                        onChange={(e) => updateResultField(row.entry_id, "transferred", e.target.checked)}
+                                                                        title="Transfer"
                                                                     />
                                                                 </td>
                                                                 <td>

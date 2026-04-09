@@ -40,7 +40,7 @@ export async function PATCH(
 
     try {
         const body = await req.json();
-        const { race_num, name, notes, status, order_index } = body ?? {};
+        const { race_num, name, notes, status, order_index, transfer_count } = body ?? {};
 
         const existing = await sql`
             SELECT *
@@ -74,7 +74,8 @@ export async function PATCH(
                 name = ${name ?? current.name},
                 notes = ${notes ?? current.notes},
                 status = ${nextStatus},
-                order_index = ${order_index ?? current.order_index}
+                order_index = ${order_index ?? current.order_index},
+                transfer_count = ${transfer_count ?? current.transfer_count}
             WHERE id = ${id}
             RETURNING *
         `;

@@ -256,6 +256,7 @@ export default function EventEntriesPage() {
 
             toast.success("Entry added.");
             await loadPage();
+            setAddEntryOverrideCarNumber("");
         } catch (error) {
             console.error(error);
             toast.error("Failed to add entry.");
@@ -959,6 +960,10 @@ export default function EventEntriesPage() {
                                         Last Name
                                         {entrySort === "name" ? (entrySortDir === "asc" ? <ChevronUp size={10} /> : <ChevronDown size={10} />) : ""}
                                     </button>
+
+                                    <div style={{ marginLeft: 50, fontSize: 14, color: "#888888" }}>
+                                        <b>{filteredEntries.length}</b> Total {activeClassName}
+                                    </div>
                                 </div>
 
                                 <div className={custStyles.tableWrap} style={{ marginTop: 20 }}>

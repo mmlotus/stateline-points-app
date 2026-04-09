@@ -72,7 +72,7 @@ export async function POST(req: Request) {
 
     for (const b of breakdowns) {
       const rmToUse =
-        continuous_feature_points && aRm && (b.type === "b_feature" || b.type === "c_feature")
+        continuous_feature_points && aRm && (b.type === "b_feature" || b.type === "c_feature" || b.type === "d_feature")
           ? aRm
           : b.result_modifiers;
 

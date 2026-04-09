@@ -75,7 +75,7 @@ export async function POST(
 
             const rmToUse =
                 scheme.continuous_feature_points && aRm &&
-                    (b.type === "b_feature" || b.type === "c_feature")
+                    (b.type === "b_feature" || b.type === "c_feature" || b.type === "d_feature")
                     ? aRm : rmRaw;
 
             const createdBreakdown = await sql`

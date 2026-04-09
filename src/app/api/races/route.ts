@@ -34,7 +34,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { race_group_id, race_num, name, notes } = body ?? {};
+        const { race_group_id, race_num, name, notes, transfer_count } = body ?? {};
 
         if (!race_group_id || !race_num) {
             return NextResponse.json(
@@ -50,7 +50,8 @@ export async function POST(req: Request) {
                 name,
                 status,
                 notes,
-                order_index
+                order_index,
+                transfer_count
             )
             VALUES (
                 ${race_group_id},
@@ -58,7 +59,8 @@ export async function POST(req: Request) {
                 ${name ?? null},
                 'scheduled',
                 ${notes ?? null},
-                ${race_num}
+                ${race_num},
+                ${transfer_count ?? 0}
             )
             RETURNING *
         `;

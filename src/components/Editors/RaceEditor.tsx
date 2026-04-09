@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import { DEFAULT_STATUS, EVENT_STATUS_OPTIONS, EventClassWithClassName, Race, RaceEditorRaceInput, RaceEditorSavePayload, RaceGroup, RaceGroupEditorBlock, RaceGroupInput, RaceGroupType, RaceInput, RaceStatus } from "@/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronRight, Plus, Save, Trash, Trash2 } from "lucide-react";
-import ClassSelect from "../ClassSelect";
 
 const GROUP_TYPE_OPTIONS: RaceGroupType[] = [
     "qualifying", "heat", "feature_d", "feature_c", "feature_b", "feature_a",
@@ -60,6 +59,7 @@ function createEmptyRaceRow(
         status: DEFAULT_STATUS,
         notes: "",
         order_index: raceNum - 1,
+        transfer_count: 0,
         ...overrides,
     };
 }
@@ -89,6 +89,7 @@ function toRaceRowState(race: Race): RaceRowState {
         status: race.status,
         notes: race.notes ?? "",
         order_index: race.order_index,
+        transfer_count: race.transfer_count ?? 0,
     };
 }
 
@@ -134,7 +135,7 @@ export default function RaceEditor({
 }) {
     const [saving, setSaving] = useState(false);
     const [showFloatingSave, setShowFloatingSave] = useState(false);
-    const [addingGroup, setAddingGroup] = useState(false);
+    const [, setAddingGroup] = useState(false);
     const saveBtnRef = useRef<HTMLButtonElement | null>(null);
 
     const resolvedClassId = useMemo(() => {
@@ -311,6 +312,7 @@ export default function RaceEditor({
                 status: race.status,
                 notes: race.notes.trim() ? race.notes.trim() : null,
                 order_index: raceIndex,
+                transfer_count: Math.max(0, Number(race.transfer_count || 0)),
             })),
         }));
 
@@ -343,61 +345,56 @@ export default function RaceEditor({
                 </button>
             )}
 
-            <div className={styles.section}>
-                {eventClasses.length ? (
-                    <div className={custStyles.header}>
-                        <ClassSelect
-                            classes={eventClasses}
-                            activeClassId={selectedClassId || null}
-                            onSelect={handleClassSelect}
-                        />
-
-                        <div className={custStyles.tools}>
-                            {!addingGroup ? (
+            {eventClasses.length ? (
+                <>
+                    <div className={styles.keyPanel}>
+                        <h2 className={styles.subheading}>Classes</h2>
+                        <div className={custStyles.tools} style={{ gap: 8, flexWrap: "wrap" }}>
+                            {eventClasses.map((cls) => (
                                 <button
-                                    type="button"
-                                    className={styles.buttonSecondary}
-                                    onClick={() => setAddingGroup(true)}
-                                    disabled={saving || !selectedClassId || availableGroupTypes.length === 0}
+                                    key={cls.id}
+                                    className={
+                                        cls.id === selectedClassId
+                                            ? styles.button
+                                            : styles.buttonSecondary
+                                    }
+                                    onClick={() => handleClassSelect(cls.id)}
+                                    disabled={saving}
                                 >
-                                    <Plus size={16} />
+                                    {cls.class_name || "Unnamed Class"}
                                 </button>
-                            ) : (
-                                <>
-                                    <select
-                                        className={styles.input}
-                                        defaultValue=""
-                                        onChange={(e) => {
-                                            const value = e.target.value as RaceGroupType | "";
-                                            if (!value) return;
-                                            addGroup(value);
-                                        }}
-                                        disabled={saving}
-                                    >
-                                        <option value="">Select group type</option>
-                                        {availableGroupTypes.map((type) => (
-                                            <option key={type} value={type}>
-                                                {prettifyGroupType(type)}
-                                            </option>
-                                        ))}
-                                    </select>
-
-                                    <button
-                                        type="button"
-                                        className={styles.buttonSecondary}
-                                        onClick={() => setAddingGroup(false)}
-                                        disabled={saving}
-                                    >
-                                        Cancel
-                                    </button>
-                                </>
-                            )}
+                            ))}
                         </div>
                     </div>
-                ) : (
-                    <div className={styles.input}>No classes assigned to this event.</div>
-                )}
-            </div>
+
+                    <div className={styles.keyPanel}>
+                        <h2 className={styles.subheading}>Add Race Group</h2>
+
+                        {!selectedClassId ? (
+                            <p className={styles.muted}>Select a class first.</p>
+                        ) : availableGroupTypes.length === 0 ? (
+                            <p className={styles.muted}>All race groups have been added for this class!</p>
+                        ) : (
+                            <div className={custStyles.tools} style={{ gap: 8, flexWrap: "wrap" }}>
+                                {availableGroupTypes.map((type) => (
+                                    <button
+                                        key={type}
+                                        type="button"
+                                        className={styles.buttonSecondary}
+                                        onClick={() => addGroup(type)}
+                                        disabled={saving || !selectedClassId}
+                                    >
+                                        {prettifyGroupType(type)}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </>
+            ) : (
+                <div className={styles.input}>No classes assigned to this event.</div>
+            )}
+
             {groupStates.map((group, groupIndex) => (
                 <div key={group.id ?? group.group_type} className={styles.section}>
                     <div className={styles.groupHeader}>
@@ -485,6 +482,23 @@ export default function RaceEditor({
                                                         </option>
                                                     ))}
                                                 </select>
+                                            </div>
+
+                                            <div className={styles.raceInlineField}>
+                                                <label className={styles.compactLabel}># of Positions to Transfer</label>
+                                                <input
+                                                    className={styles.input}
+                                                    type="number"
+                                                    min={0}
+                                                    step={1}
+                                                    value={race.transfer_count}
+                                                    onChange={(e) =>
+                                                        updateRaceRow(groupIndex, raceIndex, {
+                                                            transfer_count: Math.max(0, Number(e.target.value || 0)),
+                                                        })
+                                                    }
+                                                    disabled={saving}
+                                                />
                                             </div>
                                         </div>
 
