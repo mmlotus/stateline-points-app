@@ -116,6 +116,8 @@ export default function ClassesPage() {
                     <thead>
                         <tr>
                             <th><SortHeader label="Name" sortKey="name" /></th>
+                            <th><SortHeader label="Default Points" sortKey="default_points_scheme_id" /></th>
+                            <th><SortHeader label="Default Pay" sortKey="default_pay_scheme_id" /></th>
                             <th><SortHeader label="Created" sortKey="created_at" /></th>
                             <th></th>
                         </tr>
@@ -132,6 +134,8 @@ export default function ClassesPage() {
                             paginatedClasses.map((classItem) => (
                         <tr key={classItem.id}>
                             <td>{classItem.name}</td>
+                            <td style={{ textAlign: "center" }}>{classItem.default_points_scheme_name}</td>
+                            <td style={{ textAlign: "center" }}>{classItem.default_pay_scheme_name}</td>
                             <td style={{ textAlign: "center" }}>{isoDate(classItem.created_at)}</td>
                             <td className={custStyles.right}>
                                 <button

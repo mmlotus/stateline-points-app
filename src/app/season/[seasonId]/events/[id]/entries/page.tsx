@@ -36,10 +36,16 @@ export default function EventEntriesPage() {
     const [quickSaving, setQuickSaving] = useState(false);
     const [quickOverrideCarNum, setQuickOverrideCarNum] = useState("");
 
+    const [coDriverDrove, setCoDriverDrove] = useState(false);
+    const [quickCoDriverDrove, setQuickCoDriverDrove] = useState(false);
+    const [showCoDriverConfirm, setShowCoDriverConfirm] = useState(false);
+    const [, setPendingQuickAdd] = useState(false);
+
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [payToDrafts, setPayToDrafts] = useState<Record<string, string>>({});
+    const [payToFocusedId, setPayToFocusedId] = useState<string | null>(null);
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editSeasonClassCarId, setEditSeasonClassCarId] = useState("");
@@ -187,6 +193,18 @@ export default function EventEntriesPage() {
         return filteredOptions.filter((option) => !option.already_entered);
     }, [filteredOptions]);
 
+    const selectedAddCarOption = useMemo(() => {
+        return availableOptions.find((option) => option.id === selectedSeasonClassCarId) || null;
+    }, [availableOptions, selectedSeasonClassCarId]);
+
+    const selectedAddCarHasCoDriver = !!selectedAddCarOption?.co_driver_name?.trim();
+
+    useEffect(() => {
+        if (!selectedAddCarHasCoDriver) {
+            setCoDriverDrove(false);
+        }
+    }, [selectedAddCarHasCoDriver]);
+
     useEffect(() => {
         setSelectedSeasonClassCarId((prev) => {
             if (prev && availableOptions.some((o) => o.id === prev)) return prev;
@@ -245,6 +263,7 @@ export default function EventEntriesPage() {
                 body: JSON.stringify({
                     season_class_car_id: selectedSeasonClassCarId,
                     override_car_number: overrideNumber || null,
+                    co_driver_drove: selectedAddCarHasCoDriver ? coDriverDrove : false,
                 }),
             });
 
@@ -255,6 +274,7 @@ export default function EventEntriesPage() {
             }
 
             toast.success("Entry added.");
+            setCoDriverDrove(false);
             await loadPage();
             setAddEntryOverrideCarNumber("");
         } catch (error) {
@@ -297,6 +317,7 @@ export default function EventEntriesPage() {
         updates: {
             no_points?: boolean;
             no_pay?: boolean;
+            co_driver_drove?: boolean;
         }
     ) {
         try {
@@ -330,6 +351,12 @@ export default function EventEntriesPage() {
 
     function getPayToDraft(entry: EventEntryWithDetails) {
         return payToDrafts[entry.id] ?? entry.pay_to_name ?? "";
+    }
+
+    function shouldShowPayToSave(entry: EventEntryWithDetails) {
+        const currentDraft = getPayToDraft(entry);
+        const savedValue = entry.pay_to_name ?? "";
+        return payToFocusedId === entry.id || currentDraft !== savedValue;
     }
 
     function setPayToDraft(entryId: string, value: string) {
@@ -417,6 +444,10 @@ export default function EventEntriesPage() {
                 delete next[entry.id];
                 return next;
             });
+
+            if (payToFocusedId === entry.id) {
+                setPayToFocusedId(null);
+            }
         } catch (error) {
             console.error(error);
             toast.error("Failed to save Pay To name.");
@@ -481,6 +512,7 @@ export default function EventEntriesPage() {
                     primary_driver_name:
                         quickPrimaryMode === "new" ? quickPrimaryDriverName.trim() : undefined,
                     co_driver_id: quickCoDriverId || null,
+                    co_driver_drove: quickCoDriverDrove,
                     is_active: true,
                 }),
             });
@@ -488,7 +520,19 @@ export default function EventEntriesPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to quick add entry.");
+                const message = data.error || "Failed to quick add entry.";
+
+                if (
+                    message.toLowerCase().includes("primary driver is already registered") &&
+                    quickCoDriverId &&
+                    !quickCoDriverDrove
+                ) {
+                    setPendingQuickAdd(true);
+                    setShowCoDriverConfirm(true);
+                    return;
+                }
+
+                throw new Error(message);
             }
 
             toast.success("Entry added!");
@@ -498,6 +542,8 @@ export default function EventEntriesPage() {
             setQuickPrimaryDriverId("");
             setQuickPrimaryDriverName("");
             setQuickCoDriverId("");
+            setQuickCoDriverDrove(false);
+            setPendingQuickAdd(false);
             await loadPage();
         } catch (error) {
             console.error(error);
@@ -505,6 +551,21 @@ export default function EventEntriesPage() {
         } finally {
             setQuickSaving(false);
         }
+    }
+
+    async function handleConfirmCoDriverDrove() {
+        setShowCoDriverConfirm(false);
+        setQuickCoDriverDrove(true);
+
+        //re-run the same quick add flow on the next tick so state is updated
+        setTimeout(() => {
+            handleQuickAddEntry();
+        }, 0);
+    }
+
+    function handleCancelCoDriverDrove() {
+        setShowCoDriverConfirm(false);
+        setPendingQuickAdd(false);
     }
 
     function handleQuickPrimaryDriverChange(driverId: string) {
@@ -751,8 +812,14 @@ export default function EventEntriesPage() {
                                             className={styles.input}
                                             value={selectedSeasonClassCarId}
                                             onChange={(e) => {
-                                                setSelectedSeasonClassCarId(e.target.value);
+                                                const nextId = e.target.value;
+                                                setSelectedSeasonClassCarId(nextId);
                                                 setAddEntryOverrideCarNumber("");
+
+                                                const nextOption = availableOptions.find((option) => option.id === nextId);
+                                                if (!nextOption?.co_driver_name?.trim()) {
+                                                    setCoDriverDrove(false);
+                                                }
                                             }}
                                             disabled={!availableOptions.length || saving}
                                         >
@@ -781,6 +848,20 @@ export default function EventEntriesPage() {
                                             disabled={saving || !selectedSeasonClassCarId}
                                         />
                                     </div>
+
+                                    {selectedAddCarHasCoDriver ? (
+                                        <div>
+                                            <label className={styles.label}>Co-Driver Drove?</label>
+                                            <br></br>
+                                            <input
+                                                type="checkbox"
+                                                checked={coDriverDrove}
+                                                onChange={(e) => setCoDriverDrove(e.target.checked)}
+                                                disabled={quickSaving}
+                                                title="Co-driver drove tonight"
+                                            />
+                                        </div>
+                                    ) : null}
 
                                     <button
                                         className={styles.button}
@@ -907,6 +988,20 @@ export default function EventEntriesPage() {
                                         </select>
                                     </div>
 
+                                    {quickCoDriverId ? (
+                                        <div>
+                                            <label className={styles.label}>Co-Driver Drove?</label>
+                                            <br></br>
+                                            <input
+                                                type="checkbox"
+                                                checked={quickCoDriverDrove}
+                                                onChange={(e) => setQuickCoDriverDrove(e.target.checked)}
+                                                disabled={quickSaving}
+                                                title="Co-driver drove tonight"
+                                            />
+                                        </div>
+                                    ) : null}
+
                                     <button
                                         className={styles.buttonSecondary}
                                         onClick={handleQuickAddEntry}
@@ -966,13 +1061,14 @@ export default function EventEntriesPage() {
                                     </div>
                                 </div>
 
-                                <div className={custStyles.tableWrap} style={{ marginTop: 20 }}>
+                                <div className={custStyles.tableWrap} style={{ marginTop: 20, marginBottom: 75 }}>
                                     <table className={custStyles.table}>
                                         <thead>
                                             <tr>
                                                 <th style={{ textAlign: "center" }}>Car #</th>
                                                 <th style={{ textAlign: "center" }}>Primary Driver</th>
                                                 <th style={{ textAlign: "center" }}>Co-Driver</th>
+                                                <th style={{ textAlign: "center" }}>Co-Driver Drove?</th>
                                                 <th style={{ textAlign: "center" }}>No Points</th>
                                                 <th style={{ textAlign: "center" }}>No Pay</th>
                                                 <th style={{ textAlign: "center" }}>Pay to Other?</th>
@@ -989,12 +1085,25 @@ export default function EventEntriesPage() {
                                                     <td style={{ textAlign: "center" }}>
                                                         <input
                                                             type="checkbox"
+                                                            checked={!!entry.co_driver_drove}
+                                                            onChange={(e) =>
+                                                                handleUpdateEntryFlags(entry.id, {
+                                                                    co_driver_drove: e.target.checked,
+                                                                })
+                                                            }
+                                                            title="Co-Driver Drove"
+                                                        />
+                                                    </td>
+                                                    <td style={{ textAlign: "center" }}>
+                                                        <input
+                                                            type="checkbox"
                                                             checked={!!entry.no_points}
                                                             onChange={(e) =>
                                                                 handleUpdateEntryFlags(entry.id, {
                                                                     no_points: e.target.checked,
                                                                 })
                                                             }
+                                                            title="No Points"
                                                         />
                                                     </td>
 
@@ -1007,6 +1116,7 @@ export default function EventEntriesPage() {
                                                                     no_pay: e.target.checked,
                                                                 })
                                                             }
+                                                            title="No Pay"
                                                         />
                                                     </td>
 
@@ -1017,6 +1127,9 @@ export default function EventEntriesPage() {
                                                             onChange={(e) => {
                                                                 if (!e.target.checked) {
                                                                     clearPayToDraft(entry.id);
+                                                                    if (payToFocusedId === entry.id) {
+                                                                        setPayToFocusedId(null);
+                                                                    }
                                                                 }
 
                                                                 handlePayToOther(entry.id, {
@@ -1024,6 +1137,7 @@ export default function EventEntriesPage() {
                                                                     ...(e.target.checked ? {} : { pay_to_name: "" }),
                                                                 });
                                                             }}
+                                                            title="Pay to Other"
                                                         />
                                                     </td>
 
@@ -1033,19 +1147,28 @@ export default function EventEntriesPage() {
                                                                 <input
                                                                     className={styles.input}
                                                                     value={getPayToDraft(entry)}
+                                                                    onFocus={() => setPayToFocusedId(entry.id)}
+                                                                    onBlur={() => {
+                                                                        setTimeout(() => {
+                                                                            setPayToFocusedId((current) => (current === entry.id ? null : current));
+                                                                        }, 150);
+                                                                    }}
                                                                     onChange={(e) => setPayToDraft(entry.id, e.target.value)}
                                                                     placeholder="i.e. Ricky Bobby"
                                                                     style={{ marginBottom: 0 }}
                                                                 />
-                                                                <button
-                                                                    type="button"
-                                                                    className={styles.iconButton}
-                                                                    onClick={() => handleSavePayToName(entry)}
-                                                                    aria-label="Save Pay To name"
-                                                                    title="Save Pay To name"
-                                                                >
-                                                                    <SaveIcon size={16} />
-                                                                </button>
+                                                                {shouldShowPayToSave(entry) && (
+                                                                    <button
+                                                                        type="button"
+                                                                        className={styles.iconButton}
+                                                                        onMouseDown={(e) => e.preventDefault()}
+                                                                        onClick={() => handleSavePayToName(entry)}
+                                                                        aria-label="Save Pay To name"
+                                                                        title="Save Pay To name"
+                                                                    >
+                                                                        <SaveIcon size={16} />
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         ) : (
                                                             <span className={styles.muted}>-</span>
@@ -1094,6 +1217,23 @@ export default function EventEntriesPage() {
                 disableConfirm={
                     editSaving || !editCarNumber.trim() || !editPrimaryDriverId || (editCoDriverId !== "" && editCoDriverId === editPrimaryDriverId)
                 }
+            />
+
+            <BasicModal
+                isOpen={showCoDriverConfirm}
+                title="Co-driver drove tonight?"
+                message={
+                    <div>
+                        The selected primary driver is already registered under another car in this class for this season.
+                        <br></br>
+                        If the co-driver actually drove this car tonight, continue & mark this event entry as
+                        <b> Co-Driver Drove</b>.
+                    </div>
+                }
+                onClose={handleCancelCoDriverDrove}
+                cancelText="Cancel"
+                confirmText="Yes, co-driver drove"
+                onConfirm={handleConfirmCoDriverDrove}
             />
         </>
     );

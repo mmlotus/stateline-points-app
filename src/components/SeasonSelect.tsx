@@ -83,7 +83,7 @@ export default function SeasonSelect({
         }
     }
 
-    const showSeasonSelect = pathname === "/season";
+    const showSeasonSelect = pathname === "/season" || pathname === "/standings";
 
     if (!showSeasonSelect) return null;
     

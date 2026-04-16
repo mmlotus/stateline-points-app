@@ -3,10 +3,12 @@
 import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import toast from "react-hot-toast";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Class, Driver, Season, SeasonClassCarWithNames } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Pencil, Trash } from "lucide-react";
+import Pagination from "@/components/Pagination";
+import { useSortableData } from "@/lib/useSortableData";
 
 export default function SeasonClassCarsPage() {
     const [seasons, setSeasons] = useState<Season[]>([]);
@@ -26,6 +28,48 @@ export default function SeasonClassCarsPage() {
     const [primaryDriverId, setPrimaryDriverId] = useState("");
     const [coDriverId, setCoDriverId] = useState("");
     const [isActive, setIsActive] = useState(true);
+
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+
+    const filteredRows = useMemo(() => {
+        const term = searchTerm.trim().toLowerCase();
+
+        return rows.filter((row) => {
+            const className = (row.class_name || "").toLowerCase();
+            const carNum = (row.car_number || "").toLowerCase();
+            const primaryName = (row.primary_driver_name || "").toLowerCase();
+            const coName = (row.co_driver_name || "").toLowerCase();
+
+            const matchesSearch =
+                !term ||
+                className.includes(term) ||
+                carNum.includes(term) ||
+                primaryName.includes(term) ||
+                coName.includes(term);
+
+            const matchesStatus =
+                statusFilter === "all" ||
+                (statusFilter === "active" && row.is_active) ||
+                (statusFilter === "inactive" && !row.is_active);
+
+            return matchesSearch && matchesStatus;
+        });
+    }, [rows, searchTerm, statusFilter]);
+
+    const {
+        SortHeader,
+        sortedData: sortedRows,
+        paginatedData: paginatedRows,
+        currentPage,
+        setCurrentPage,
+        perPage,
+        setPerPage,
+    } = useSortableData<SeasonClassCarWithNames>({
+        data: filteredRows,
+        initialKey: "class_name",
+        initialPerPage: 10,
+    });
 
     async function loadLookups() {
         const [seasonsRes, classesRes, driversRes] = await Promise.all([
@@ -85,6 +129,7 @@ export default function SeasonClassCarsPage() {
     }
 
     function startEdit(row: SeasonClassCarWithNames) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
         setEditingId(row.id);
         setClassId(row.class_id);
         setCarNumber(row.car_number);
@@ -192,6 +237,10 @@ export default function SeasonClassCarsPage() {
         });
     }, [selectedSeasonId, selectedClassId]);
 
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, statusFilter, setCurrentPage]);
+
     if (loading) return <LoadingSpinner />
 
     return (
@@ -239,6 +288,34 @@ export default function SeasonClassCarsPage() {
                                         {cls.name}
                                     </option>
                                 ))}
+                            </select>
+                        </div>
+
+                        <div style={{ marginTop: 50 }}>
+                            <label className={styles.label}>Search</label>
+                            <input
+                                className={styles.input}
+                                type="text"
+                                placeholder="Search by name or car #..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                style={{ minWidth: "260px" }}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={styles.label}>Filter Status</label>
+                            <select
+                                className={styles.input}
+                                value={statusFilter}
+                                onChange={(e) =>
+                                    setStatusFilter(e.target.value as "all" | "active" | "inactive")
+                                }
+                                style={{ minWidth: "180px" }}
+                            >
+                                <option value="all">All drivers</option>
+                                <option value="active">Active Only</option>
+                                <option value="inactive">Inactive Only</option>
                             </select>
                         </div>
                     </div>
@@ -362,20 +439,29 @@ export default function SeasonClassCarsPage() {
                 <h2 className={styles.subheading}>Current Registrations</h2>
             </div>
 
+            <Pagination
+                currentPage={currentPage}
+                perPage={perPage}
+                totalItems={sortedRows.length}
+                onPageChange={setCurrentPage}
+                onPerPageChange={setPerPage}
+                label="cars"
+            />
+
             <div className={custStyles.tableWrap}>
                 <table className={custStyles.table}>
                     <thead>
                         <tr>
-                            <th>Class</th>
-                            <th>Car #</th>
-                            <th>Primary Driver</th>
-                            <th>Co-Driver</th>
-                            <th>Active?</th>
+                            <th><SortHeader label="Class" sortKey="class_name" /></th>
+                            <th><SortHeader label="Car #" sortKey="car_number" /></th>
+                            <th><SortHeader label="Primary Driver" sortKey="primary_driver_name" /></th>
+                            <th><SortHeader label="Co-Driver" sortKey="co_driver_name" /></th>
+                            <th><SortHeader label="Active?" sortKey="is_active" /></th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        {!rows.length ? (
+                        {!sortedRows.length ? (
                             <tr>
                                 <td colSpan={6}>
                                     {selectedSeasonId
@@ -384,7 +470,7 @@ export default function SeasonClassCarsPage() {
                                 </td>
                             </tr>
                         ) : (
-                            rows.map((row) => (
+                            paginatedRows.map((row) => (
                                 <tr key={row.id}>
                                     <td>{row.class_name}</td>
                                     <td>{row.car_number}</td>

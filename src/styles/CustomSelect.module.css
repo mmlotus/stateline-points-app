@@ -33,10 +33,12 @@
   border: 1px solid var(--border);
   color: var(--text);
   border-radius: 4px;
+  max-height: 320px;
   min-width: 100%;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
   z-index: 2000;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .customSelectItem {
@@ -46,7 +48,7 @@
 }
 
 .customSelectItem:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(88, 83, 83, 0.08);
 }
 
 .activeItem {

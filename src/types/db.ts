@@ -94,6 +94,7 @@ export type SeasonClassCarUpdatePayload = SeasonClassCarCreatePayload & {
 
 export type QuickAddEntryPayload = Omit<
     SeasonClassCarCreatePayload, "season_id" | "primary_driver_id"> & {
+        co_driver_drove?: boolean;
         primary_driver_id?: string;
         primary_driver_name?: string;
         override_car_number?: string | null;
@@ -118,7 +119,14 @@ export type Class = {
     id: string;
     name: string;
     created_at: string;
+    default_points_scheme_id?: string | null;
+    default_pay_scheme_id?: string | null;
+    default_points_scheme_name?: string | null;
+    default_pay_scheme_name?: string | null;
 };
+
+export type ClassSavePayload = Omit<
+    Class, "id" | "created_at">;
 
 /* EVENT ENTRIES */
 export type EventEntry = {
@@ -126,6 +134,7 @@ export type EventEntry = {
     event_id: string;
     season_class_car_id: string;
     override_car_number: string | null;
+    co_driver_drove?: boolean;
     no_points: boolean;
     no_pay: boolean;
     pay_to_other: boolean;
@@ -151,9 +160,11 @@ export type EventEntryWithDetails = EventEntry & {
 export type EventEntryCreatePayload = {
     season_class_car_id: string;
     override_car_number?: string | null;
+    co_driver_drove?: boolean;
 };
 
 export type EventEntryUpdatePayload = {
+    co_driver_drove?: boolean;
     no_points?: boolean;
     no_pay?: boolean;
     pay_to_other?: boolean;
@@ -255,6 +266,7 @@ export type ResultWithDetails = ResultRow & {
     primary_driver_name: string;
     co_driver_id: string | null;
     co_driver_name: string | null;
+    co_driver_drove: boolean;
     is_active: boolean;
 };
 

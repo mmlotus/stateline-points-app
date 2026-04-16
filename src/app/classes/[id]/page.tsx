@@ -5,7 +5,7 @@ import custStyles from "@/styles/Customers.module.css";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Class } from "@/types";
+import { Class, ClassSavePayload } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ClassEditor from "@/components/Editors/ClassEditor";
 
@@ -42,7 +42,7 @@ export default function EditClassPage() {
         if (id) loadClass();
     }, [id, router]);
 
-    async function handleSave(payload: Pick<Class, "name">) {
+    async function handleSave(payload: ClassSavePayload) {
         const tId = toast.loading("Updating class...");
 
         try {
@@ -78,6 +78,8 @@ export default function EditClassPage() {
 
             <ClassEditor
                 name={classData.name}
+                default_points_scheme_id={classData.default_points_scheme_id ?? null}
+                default_pay_scheme_id={classData.default_pay_scheme_id ?? null}
                 onSave={handleSave}
                 onCancel={() => router.push("/classes")}
             />

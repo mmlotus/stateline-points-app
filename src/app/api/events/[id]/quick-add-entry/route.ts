@@ -34,11 +34,16 @@ async function validateQuickAddRules(args: {
     class_id: string;
     primary_driver_id?: string;
     co_driver_id?: string | null;
+    co_driver_drove?: boolean;
 }) {
-    const { season_id, class_id, primary_driver_id, co_driver_id } = args;
+    const { season_id, class_id, primary_driver_id, co_driver_id, co_driver_drove } = args;
 
     if (primary_driver_id && co_driver_id && primary_driver_id === co_driver_id) {
         return "Primary driver and co-driver cannot be the same.";
+    }
+
+    if (co_driver_drove && !co_driver_id) {
+        return "Select a co-driver before marking that the co-driver drove tonight.";
     }
 
     if (primary_driver_id) {
@@ -46,7 +51,7 @@ async function validateQuickAddRules(args: {
             season_id, class_id, primary_driver_id
         );
 
-        if (primaryConflict) {
+        if (primaryConflict && !co_driver_drove) {
             return "This primary driver is already registered under another car in this class for this season.";
         }
     }
@@ -97,6 +102,7 @@ export async function POST(req: Request, context: RouteContext) {
             primary_driver_id,
             primary_driver_name,
             co_driver_id,
+            co_driver_drove,
             is_active,
         } = body ?? {};
 
@@ -195,6 +201,7 @@ export async function POST(req: Request, context: RouteContext) {
             class_id,
             primary_driver_id,
             co_driver_id,
+            co_driver_drove,
         });
 
         if (ruleError) {
@@ -260,12 +267,14 @@ export async function POST(req: Request, context: RouteContext) {
                 INSERT INTO event_entries (
                     event_id,
                     season_class_car_id,
-                    override_car_number
+                    override_car_number,
+                    co_driver_drove
                 )
                 SELECT
                     ${eventId},
                     id,
-                    ${normalizedOverrideCarNum}
+                    ${normalizedOverrideCarNum},
+                    ${!!co_driver_drove}
                 FROM inserted_season_class_car
                 RETURNING *
             )   
@@ -310,12 +319,14 @@ export async function POST(req: Request, context: RouteContext) {
                 INSERT INTO event_entries (
                     event_id,
                     season_class_car_id,
-                    override_car_number
+                    override_car_number,
+                    co_driver_drove
                 )
                 SELECT
                     ${eventId},
                     id,
-                    ${normalizedOverrideCarNum}
+                    ${normalizedOverrideCarNum},
+                    ${!!co_driver_drove}
                 FROM inserted_season_class_car
                 RETURNING *
             )

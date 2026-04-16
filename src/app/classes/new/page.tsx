@@ -4,13 +4,13 @@ import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Class } from "@/types";
+import { ClassSavePayload } from "@/types";
 import ClassEditor from "@/components/Editors/ClassEditor";
 
 export default function NewClassPage() {
     const router = useRouter();
 
-    async function handleSave(payload: Pick<Class, "name">) {
+    async function handleSave(payload: ClassSavePayload) {
         const tId = toast.loading("Creating new class...");
 
         try {

@@ -5,7 +5,7 @@ import custStyles from "@/styles/Customers.module.css";
 import { useEffect, useState } from "react";
 import { EventRow, Season } from "@/types";
 import { useRouter } from "next/navigation";
-import { Flag, Pencil, TrashIcon, Trophy, UserRoundPen } from "lucide-react";
+import { Flag, Medal, Pencil, TrashIcon, Trophy, UserRoundPen } from "lucide-react";
 import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Pagination from "@/components/Pagination";
@@ -210,6 +210,16 @@ export default function SeasonSchedulePage() {
                                             }
                                             aria-label="Manage results"
                                             title="Manage results"
+                                        >
+                                            <Medal size={16} />
+                                        </button>
+                                        <button
+                                            className={styles.iconButton}
+                                            onClick={() =>
+                                                router.push(`/season/${season?.id}/events/${event.id}/points-pay`)
+                                            }
+                                            aria-label="Manage points/pay"
+                                            title="Manage awards"
                                         >
                                             <Trophy size={16} />
                                         </button>

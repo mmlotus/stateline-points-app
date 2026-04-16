@@ -51,6 +51,9 @@
   border-radius: 10px;
   background: #fff;
   overflow: hidden;
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .suggestionButton {

@@ -26,7 +26,10 @@ function prettifyGroupType(value: RaceGroupType) {
 function getDefaultRaceName(groupType: RaceGroupType, raceNum: number) {
     switch (groupType) {
         case "qualifying": return raceNum === 1 ? "Qualifying" : `Qualifying ${raceNum}`;
-        case "heat": return `Heat ${raceNum}`;
+        case "heat": {
+            const letter = String.fromCharCode(64 + raceNum);
+            return `${letter} Heat`;
+        }
         case "feature_d": return raceNum === 1 ? "D Main" : `D Main ${raceNum}`;
         case "feature_c": return raceNum === 1 ? "C Main" : `C Main ${raceNum}`;
         case "feature_b": return raceNum === 1 ? "B Main" : `B Main ${raceNum}`;
@@ -199,6 +202,37 @@ export default function RaceEditor({
             prev.map((group, i) => {
                 if (i !== groupIndex) return group;
 
+                if (group.group_type === "heat") {
+                    const shiftedExistingRaces = group.races.map((race) => {
+                        const nextRaceNum = race.race_num + 1;
+                        const oldDefault = getDefaultRaceName(group.group_type, race.race_num);
+                        const newDefault = getDefaultRaceName(group.group_type, nextRaceNum);
+
+                        return {
+                            ...race,
+                            race_num: nextRaceNum,
+                            name:
+                                !race.name.trim() || race.name === oldDefault
+                                    ? newDefault : race.name,
+                        };
+                    });
+
+                    return {
+                        ...group,
+                        races: [
+                            ...shiftedExistingRaces,
+                            createEmptyRaceRow(group.group_type, 1, {
+                                race_num: 1,
+                                order_index: shiftedExistingRaces.length,
+                                name: getDefaultRaceName(group.group_type, 1),
+                            }),
+                        ].map((race, idx) => ({
+                            ...race,
+                            order_index: idx,
+                        })),
+                    };
+                }
+
                 const nextRaceNum = group.races.length + 1;
 
                 return {
@@ -223,6 +257,22 @@ export default function RaceEditor({
 
                 const rebuilt = next.length
                     ? next.map((race, idx) => {
+                        if (group.group_type === "heat") {
+                            const totalHeats = next.length;
+                            const nextRaceNum = totalHeats - idx;
+                            const oldDefault = getDefaultRaceName(group.group_type, race.race_num);
+                            const newDefault = getDefaultRaceName(group.group_type, nextRaceNum);
+
+                            return {
+                                ...race,
+                                race_num: nextRaceNum,
+                                order_index: idx,
+                                name:
+                                    !race.name.trim() || race.name === oldDefault
+                                        ? newDefault : race.name,
+                            };
+                        }
+
                         const nextRaceNum = idx + 1;
                         const oldDefault = getDefaultRaceName(group.group_type, race.race_num);
                         const newDefault = getDefaultRaceName(group.group_type, nextRaceNum);
@@ -307,8 +357,8 @@ export default function RaceEditor({
             notes: group.notes.trim() ? group.notes.trim() : "",
             races: group.races.map((race, raceIndex): RaceEditorRaceInput => ({
                 ...(race.id ? { id: race.id } : {}),
-                race_num: raceIndex + 1,
-                name: race.name.trim() || getDefaultRaceName(group.group_type, raceIndex + 1),
+                race_num: race.race_num,
+                name: race.name.trim() || getDefaultRaceName(group.group_type, race.race_num),
                 status: race.status,
                 notes: race.notes.trim() ? race.notes.trim() : null,
                 order_index: raceIndex,

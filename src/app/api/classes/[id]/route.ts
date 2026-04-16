@@ -9,9 +9,20 @@ export async function GET(
 
     try {
         const rows = await sql`
-            SELECT id, name, created_at
-            FROM classes
-            WHERE id = ${id}
+            SELECT
+                c.id,
+                c.name,
+                c.created_at,
+                c.default_points_scheme_id,
+                c.default_pay_scheme_id,
+                ps.name AS default_points_scheme_name,
+                pay.name AS default_pay_scheme_name
+            FROM classes c
+            LEFT JOIN schemes ps
+                ON ps.id = c.default_points_scheme_id
+            LEFT JOIN schemes pay
+                ON pay.id = c.default_pay_scheme_id
+            WHERE c.id = ${id}
             LIMIT 1
         `;
 
@@ -40,7 +51,10 @@ export async function PATCH(
 
     try {
         const body = await req.json();
+
         const name = body?.name?.trim();
+        const default_points_scheme_id = body?.default_points_scheme_id || null;
+        const default_pay_scheme_id = body?.default_pay_scheme_id || null;
 
         if (!name) {
             return NextResponse.json({ error: "Class name is required" }, { status: 400 });
@@ -77,9 +91,12 @@ export async function PATCH(
 
         const updated = await sql`
             UPDATE classes
-            SET name = ${name}
+            SET
+                name = ${name},
+                default_points_scheme_id = ${default_points_scheme_id},
+                default_pay_scheme_id = ${default_pay_scheme_id}
             WHERE id = ${id}
-            RETURNING id, name, created_at
+            RETURNING id, name, created_at, default_points_scheme_id, default_pay_scheme_id
         `;
 
         return NextResponse.json(updated[0], { status: 200 });
@@ -97,9 +114,9 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
-    
+
     try {
-        
+
         await sql`
             DELETE FROM classes WHERE id = ${id}
         `;

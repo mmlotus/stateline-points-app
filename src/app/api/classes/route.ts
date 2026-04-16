@@ -4,9 +4,20 @@ import sql from "@/lib/db";
 export async function GET() {
     try {
         const classes = await sql`
-            SELECT id, name, created_at
-            FROM classes
-            ORDER BY name ASC
+            SELECT
+                c.id,
+                c.name,
+                c.created_at,
+                c.default_points_scheme_id,
+                c.default_pay_scheme_id,
+                ps.name AS default_points_scheme_name,
+                pay.name AS default_pay_scheme_name
+            FROM classes c
+            LEFT JOIN schemes ps
+                ON ps.id = c.default_points_scheme_id
+            LEFT JOIN schemes pay
+                ON pay.id = c.default_pay_scheme_id
+            ORDER BY c.name ASC
         `;
 
         return NextResponse.json(classes, { status: 200 });
@@ -22,7 +33,10 @@ export async function GET() {
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
+
         const name = body?.name?.trim();
+        const default_points_scheme_id = body?.default_points_scheme_id || null;
+        const default_pay_scheme_id = body?.default_pay_scheme_id || null;
 
         if (!name) {
             return NextResponse.json(
@@ -46,9 +60,17 @@ export async function POST(req: NextRequest) {
         }
 
         const inserted = await sql`
-            INSERT INTO classes (name)
-            VALUES (${name})
-            RETURNING id, name, created_at
+            INSERT INTO classes (
+                name,
+                default_points_scheme_id,
+                default_pay_scheme_id    
+            )
+            VALUES (
+                ${name},
+                ${default_points_scheme_id},
+                ${default_pay_scheme_id}
+            )
+            RETURNING id, name, created_at, default_points_scheme_id, default_pay_scheme_id
         `;
 
         return NextResponse.json(inserted[0], { status: 201 });

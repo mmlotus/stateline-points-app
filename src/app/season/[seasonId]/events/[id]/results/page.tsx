@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { EventClassWithClassName, EventEntryWithDetails, EventRow, Race, RaceGroup, ResultsSavePayload, ResultWithDetails } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate } from "@/components/Formatter";
-import { Trash } from "lucide-react";
+import { CircleGauge, Trash } from "lucide-react";
 import DragHandle from "@/components/DragDots";
 
 export default function EventResultsPage() {
@@ -146,6 +146,15 @@ export default function EventResultsPage() {
                 const flattenedRaces = raceResults
                     .flat()
                     .sort((a, b) => {
+                        const aName = (a.name ?? "").trim();
+                        const bName = (b.name ?? "").trim();
+                        const aIsHeat = /heat$/i.test(aName);
+                        const bIsHeat = /heat$/i.test(bName);
+
+                        if (aIsHeat && bIsHeat) {
+                            return bName.localeCompare(aName, undefined, { sensitivity: "base" });
+                        }
+
                         if (a._groupOrder !== b._groupOrder) return a._groupOrder - b._groupOrder;
                         if (a.order_index !== b.order_index) return a.order_index - b.order_index;
                         if (a.race_num !== b.race_num) return a.race_num - b.race_num;
@@ -290,6 +299,7 @@ export default function EventResultsPage() {
                 primary_driver_name: entry.primary_driver_name,
                 co_driver_id: entry.co_driver_id,
                 co_driver_name: entry.co_driver_name,
+                co_driver_drove: entry.co_driver_drove ? entry.co_driver_drove : false,
                 is_active: entry.is_active,
             };
 
@@ -474,6 +484,13 @@ export default function EventResultsPage() {
                     >
                         Races
                     </button>
+
+                    <button
+                        className={styles.button}
+                        onClick={() => router.push(`/season/${seasonId}/events/${eventId}/points-pay`)}
+                    >
+                        Awards
+                    </button>
                 </div>
             </div>
 
@@ -587,10 +604,15 @@ export default function EventResultsPage() {
                                                             {entry.primary_driver_name}
                                                         </div>
 
-                                                        <div className={styles.resultsEntrySub}>
-                                                            {entry.co_driver_name
-                                                                ? `${entry.co_driver_name}`
-                                                                : ""}
+                                                        <div className={styles.resultsEntrySub} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                            {entry.co_driver_name ? (
+                                                                <>
+                                                                    <span>{entry.co_driver_name}</span>
+                                                                    {entry.co_driver_drove ? <CircleGauge size={10} /> : null}
+                                                                </>
+                                                            ) : (
+                                                                ""
+                                                            )}
                                                         </div>
 
                                                         {flags ? (
@@ -705,10 +727,15 @@ export default function EventResultsPage() {
                                                                     <div className={custStyles.name}>
                                                                         {row.primary_driver_name}
                                                                     </div>
-                                                                    <div className={custStyles.subtle}>
-                                                                        {row.co_driver_name
-                                                                            ? `Co-driver: ${row.co_driver_name}`
-                                                                            : ""}
+                                                                    <div className={custStyles.subtle} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                                        {row.co_driver_name ? (
+                                                                            <>
+                                                                                <span>{row.co_driver_name}</span>
+                                                                                {row.co_driver_drove ? <CircleGauge size={14} /> : null}
+                                                                            </>
+                                                                        ) : (
+                                                                            ""
+                                                                        )}
                                                                     </div>
                                                                 </td>
                                                                 <td>
@@ -780,7 +807,8 @@ export default function EventResultsPage() {
                         </div>
                     </div>
                 </>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

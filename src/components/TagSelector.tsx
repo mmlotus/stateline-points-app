@@ -1,5 +1,5 @@
 import styles from "@/styles/Tags.module.css";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type TagSelectorProps = {
   options: string[];
@@ -15,6 +15,8 @@ export default function TagSelector({
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
   const filteredOptions = useMemo(() => {
     const q = query.trim().toLowerCase();
 
@@ -23,8 +25,7 @@ export default function TagSelector({
       .filter((val) => {
         const label = labelForValue ? labelForValue(val) : val;
         return !q || label.toLowerCase().includes(q);
-      })
-      .slice(0, 8);
+      });
   }, [options, selected, query, labelForValue]);
 
   const exactExistingMatch = useMemo(() => {
@@ -75,14 +76,24 @@ export default function TagSelector({
     onChange(selected.filter((v) => v !== val));
   };
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div
+      ref={wrapperRef}
       className={styles.tagSelector}
-      onBlur={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-          setIsOpen(false);
-        }
-      }}
     >
       <div className={styles.tags} onClick={() => setIsOpen(true)}>
         {selected.map(val => (

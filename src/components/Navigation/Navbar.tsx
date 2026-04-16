@@ -64,7 +64,8 @@ export default function Navbar() {
 
     const isSched =
         isAuthenticated &&
-        pathname.startsWith("/season");
+        pathname.startsWith("/season")
+        || pathname === "/standings";
 
     console.log("auth:", isAuthenticated);
     console.log("path:", pathname);

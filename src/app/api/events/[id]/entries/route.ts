@@ -20,6 +20,7 @@ export async function GET(_req: Request, context: RouteContext) {
                 ee.event_id,
                 ee.season_class_car_id,
                 ee.override_car_number,
+                ee.co_driver_drove,
                 ee.no_points,
                 ee.no_pay,
                 ee.pay_to_other,
@@ -63,10 +64,11 @@ export async function POST(req: Request, context: RouteContext) {
     try {
         const { id: eventId } = await context.params;
         const body = (await req.json()) as EventEntryCreatePayload;
-        const { season_class_car_id, override_car_number } = body ?? {};
+        const { season_class_car_id, override_car_number, co_driver_drove } = body ?? {};
 
         const trimmedOverrideCarNumber = String(override_car_number || "").trim();
         const normalizedOverrideCarNumber = trimmedOverrideCarNumber || null;
+        const normalizedCoDriverDrove = Boolean(co_driver_drove);
 
         if (!eventId) {
             return NextResponse.json({ error: "Event ID is required." }, { status: 400 });
@@ -153,12 +155,14 @@ export async function POST(req: Request, context: RouteContext) {
             INSERT INTO event_entries (
                 event_id,
                 season_class_car_id,
-                override_car_number
+                override_car_number,
+                co_driver_drove
             )
             VALUES (
                 ${eventId},
                 ${season_class_car_id},
-                ${normalizedOverrideCarNumber}
+                ${normalizedOverrideCarNumber},
+                ${normalizedCoDriverDrove}
             )
             ON CONFLICT (event_id, season_class_car_id) DO NOTHING
             RETURNING *
@@ -185,7 +189,7 @@ export async function PATCH(req: Request, context: RouteContext) {
         const entryId = url.searchParams.get("entry_id");
 
         const body = (await req.json()) as EventEntryUpdatePayload;
-        const { no_points, no_pay, pay_to_other, pay_to_name, notes } = body ?? {};
+        const { co_driver_drove, no_points, no_pay, pay_to_other, pay_to_name, notes } = body ?? {};
 
         if (!eventId) {
             return NextResponse.json({ error: "Event ID is required." }, { status: 400 });
@@ -213,6 +217,7 @@ export async function PATCH(req: Request, context: RouteContext) {
         const updated = await sql`
             UPDATE event_entries
             SET
+                co_driver_drove = COALESCE(${co_driver_drove}, co_driver_drove),
                 no_points = COALESCE(${no_points}, no_points),
                 no_pay = COALESCE(${no_pay}, no_pay),
                 pay_to_other = COALESCE(${pay_to_other}, pay_to_other),

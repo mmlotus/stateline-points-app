@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import sql from "@/lib/db";
 import { ResultInput, ResultsSavePayload } from "@/types";
+import { markEventComplete } from "@/lib/syncEventStatus";
 
 export async function GET(req: Request) {
     try {
@@ -28,6 +29,7 @@ export async function GET(req: Request) {
                 ee.event_id,
                 ee.season_class_car_id,
                 ee.override_car_number,
+                ee.co_driver_drove,
                 ee.no_points,
                 ee.no_pay,
                 ee.pay_to_other,
@@ -192,6 +194,8 @@ export async function PUT(req: Request) {
                 WHERE id = ${race_id}
             `;
 
+            await markEventComplete(raceRow.event_id);
+
             const savedRows = await sql`
                 SELECT
                     r.id,
@@ -213,6 +217,7 @@ export async function PUT(req: Request) {
                     ee.no_pay,
                     ee.pay_to_other,
                     ee.pay_to_name,
+                    ee.co_driver_drove,
 
                     scc.season_id,
                     scc.class_id,

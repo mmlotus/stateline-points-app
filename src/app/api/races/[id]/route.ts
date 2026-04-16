@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import sql from "@/lib/db";
 import { hasErrorCode } from "@/lib/api-errors";
+import { markEventComplete } from "@/lib/syncEventStatus";
 
 export async function GET(
     _req: Request,
@@ -79,6 +80,21 @@ export async function PATCH(
             WHERE id = ${id}
             RETURNING *
         `;
+
+        const eventRows = await sql`
+            SELECT ec.event_id
+            FROM races ra
+            INNER JOIN race_groups rg
+                ON rg.id = ra.race_group_id
+            INNER JOIN event_classes ec
+                ON ec.id = rg.event_class_id
+            WHERE ra.id = ${id}
+            LIMIT 1
+        `;
+
+        if (eventRows.length) {
+            await markEventComplete(eventRows[0].event_id);
+        }
 
         return NextResponse.json(updated[0]);
     } catch (error: unknown) {
