@@ -26,6 +26,7 @@ export type CalculatedRaceAwardRow = CalculationBasics & {
     base_points: number;
     show_up_points: number;
     passing_points: number;
+    add_points_awarded: number;
     manual_points_adj: number;
     awarded_points: number;
     base_pay: number;

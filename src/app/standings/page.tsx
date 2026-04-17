@@ -10,6 +10,7 @@ import { Class, Season, StandingRow } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate, todayDate } from "@/components/Formatter";
 import { ChevronDown } from "lucide-react";
+import { getClassDisplayName } from "@/lib/getClassName";
 
 export default function StandingsPage() {
     const router = useRouter();
@@ -23,7 +24,9 @@ export default function StandingsPage() {
 
     const [allClasses, setAllClasses] = useState<Class[]>([]);
     const [selectedClassId, setSelectedClassId] = useState("");
-    const selectedClass = allClasses.find((c) => c.id === selectedClassId)?.name || "Class";
+
+    const selectedClassObj = allClasses.find((c) => c.id === selectedClassId);
+    const selectedClass = selectedClassObj ? getClassDisplayName(selectedClassObj) : "Class";
 
     const [standings, setStandings] = useState<StandingRow[]>([]);
 
@@ -238,7 +241,7 @@ export default function StandingsPage() {
                                         setOpen(false);
                                     }}
                                 >
-                                    {cls.name}
+                                    {getClassDisplayName(cls)}
                                 </div>
                             ))}
                         </div>

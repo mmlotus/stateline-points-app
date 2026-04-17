@@ -8,12 +8,14 @@ import toast from "react-hot-toast";
 
 export default function ClassEditor({
     name: initialName = "",
+    class_sponsor: initialClassSponsor = "",
     default_points_scheme_id: initialDefaultPts = null,
     default_pay_scheme_id: initialDefaultPay = null,
     onSave,
     onCancel,
 }: {
     name?: string;
+    class_sponsor?: string | "";
     default_points_scheme_id?: string | null;
     default_pay_scheme_id?: string | null;
     onSave: (payload: ClassSavePayload) => Promise<void> | void;
@@ -22,6 +24,7 @@ export default function ClassEditor({
     const [availSchemes, setAvailSchemes] = useState<Scheme[]>([]);
 
     const [name, setName] = useState(initialName);
+    const [sponsor, setSponsor] = useState(initialClassSponsor ?? "");
     const [defaultPts, setDefaultPts] = useState(initialDefaultPts ?? "");
     const [defaultPay, setDefaultPay] = useState(initialDefaultPay ?? "");
 
@@ -30,9 +33,10 @@ export default function ClassEditor({
 
     useEffect(() => {
         setName(initialName);
+        setSponsor(initialClassSponsor ?? "");
         setDefaultPts(initialDefaultPts ?? "");
         setDefaultPay(initialDefaultPay ?? "");
-    }, [initialName, initialDefaultPts, initialDefaultPay]);
+    }, [initialName, initialClassSponsor, initialDefaultPts, initialDefaultPay]);
 
     useEffect(() => {
         async function loadSchemes() {
@@ -72,6 +76,7 @@ export default function ClassEditor({
         try {
             await onSave({
                 name: finalName,
+                class_sponsor: sponsor || "",
                 default_points_scheme_id: defaultPts || null,
                 default_pay_scheme_id: defaultPay || null,
             });
@@ -83,14 +88,35 @@ export default function ClassEditor({
     return (
         <>
             <div className={styles.section}>
-                <label className={styles.label}>Class Name</label>
-                <input
-                    style={{ marginTop: 5, marginBottom: 14 }}
-                    className={styles.input}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Hangry's Bump To Pass"
-                />
+                <div
+                    style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 16,
+                    }}
+                >
+                    <div style={{ flex: "1 1 320px", minWidth: 320 }}>
+                        <label className={styles.label}>Name</label>
+                        <input
+                            style={{ marginTop: 5, marginBottom: 14 }}
+                            className={styles.input}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="e.g. Bump To Pass"
+                        />
+                    </div>
+
+                    <div style={{ flex: "1 1 320px", minWidth: 320 }}>
+                        <label className={styles.label}>Sponsor</label>
+                        <input
+                            style={{ marginTop: 5, marginBottom: 14 }}
+                            className={styles.input}
+                            value={sponsor}
+                            onChange={(e) => setSponsor(e.target.value)}
+                            placeholder="e.g. Impel Motorsports"
+                        />
+                    </div>
+                </div>
 
                 <div className={custStyles.tools} style={{ gap: 8, flexWrap: "wrap" }}>
                     <div>

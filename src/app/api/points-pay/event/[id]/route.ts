@@ -53,6 +53,7 @@ export async function GET(
             cra.base_points,
             cra.show_up_points,
             cra.passing_points,
+            cra.add_points_awarded,
             cra.manual_points_adj,
             cra.awarded_points,
             cra.base_pay,

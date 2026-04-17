@@ -411,7 +411,7 @@ export default function RaceEditor({
                                     onClick={() => handleClassSelect(cls.id)}
                                     disabled={saving}
                                 >
-                                    {cls.class_name || "Unnamed Class"}
+                                    {cls.class_sponsor ? `${cls.class_sponsor} ${cls.class_name}` : cls.class_name}
                                 </button>
                             ))}
                         </div>

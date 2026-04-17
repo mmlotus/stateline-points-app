@@ -19,6 +19,7 @@ export async function GET(req: Request) {
                 ec.event_id,
                 ec.class_id,
                 ec.created_at,
+                c.class_sponsor,
                 c.name AS class_name
             FROM event_classes ec
             LEFT JOIN classes c

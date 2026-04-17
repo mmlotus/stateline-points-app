@@ -90,6 +90,7 @@ async function loadResultsForEventClass(
             r.dq,
             r.bf,
             r.transferred,
+            r.add_points_value,
             r.notes,
             r.created_at,
 
@@ -278,6 +279,7 @@ export async function POST(req: Request) {
                 base_points: number;
                 show_up_points: number;
                 passing_points: number;
+                add_points_awarded: number;
                 manual_points_adj: number;
                 awarded_points: number;
                 base_pay: number;
@@ -330,6 +332,7 @@ export async function POST(req: Request) {
                         base_points,
                         show_up_points,
                         passing_points,
+                        add_points_awarded,
                         manual_points_adj,
                         awarded_points,
                         base_pay,
@@ -355,6 +358,7 @@ export async function POST(req: Request) {
                         ${award.base_points},
                         ${award.show_up_points},
                         ${award.passing_points},
+                        ${award.add_points_awarded},
                         ${award.manual_points_adj},
                         ${award.awarded_points},
                         ${award.base_pay},
@@ -459,6 +463,7 @@ export async function POST(req: Request) {
                     cra.base_points,
                     cra.show_up_points,
                     cra.passing_points,
+                    cra.add_points_awarded,
                     cra.manual_points_adj,
                     cra.awarded_points,
                     cra.base_pay,

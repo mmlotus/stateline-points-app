@@ -78,6 +78,7 @@ export default function EditClassPage() {
 
             <ClassEditor
                 name={classData.name}
+                class_sponsor={classData.class_sponsor ?? ""}
                 default_points_scheme_id={classData.default_points_scheme_id ?? null}
                 default_pay_scheme_id={classData.default_pay_scheme_id ?? null}
                 onSave={handleSave}

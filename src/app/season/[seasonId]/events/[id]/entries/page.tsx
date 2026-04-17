@@ -785,7 +785,7 @@ export default function EventEntriesPage() {
                                         }
                                         onClick={() => setActiveClassId(cls.class_id)}
                                     >
-                                        {cls.class_name || "Unnamed Class"}
+                                        {cls.class_sponsor ? `${cls.class_sponsor} ${cls.class_name}` : cls.class_name}
                                     </button>
                                 ))}
                             </div>

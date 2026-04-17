@@ -12,6 +12,7 @@ export async function GET(
             SELECT
                 c.id,
                 c.name,
+                c.class_sponsor,
                 c.created_at,
                 c.default_points_scheme_id,
                 c.default_pay_scheme_id,
@@ -53,6 +54,7 @@ export async function PATCH(
         const body = await req.json();
 
         const name = body?.name?.trim();
+        const class_sponsor = body?.class_sponsor?.trim() || "";
         const default_points_scheme_id = body?.default_points_scheme_id || null;
         const default_pay_scheme_id = body?.default_pay_scheme_id || null;
 
@@ -93,10 +95,11 @@ export async function PATCH(
             UPDATE classes
             SET
                 name = ${name},
+                class_sponsor = ${class_sponsor},
                 default_points_scheme_id = ${default_points_scheme_id},
                 default_pay_scheme_id = ${default_pay_scheme_id}
             WHERE id = ${id}
-            RETURNING id, name, created_at, default_points_scheme_id, default_pay_scheme_id
+            RETURNING id, name, class_sponsor, created_at, default_points_scheme_id, default_pay_scheme_id
         `;
 
         return NextResponse.json(updated[0], { status: 200 });

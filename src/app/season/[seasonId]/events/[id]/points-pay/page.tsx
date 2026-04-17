@@ -450,7 +450,7 @@ export default function PointsPayDetailPage() {
                                             }
                                             onClick={() => setSelectedEventClassId(cls.class_id)}
                                         >
-                                            {cls.class_name || "Unnamed Class"}
+                                            {cls.class_sponsor ? `${cls.class_sponsor} ${cls.class_name}` : cls.class_name}
                                         </button>
                                     ))}
                                 </div>
@@ -587,141 +587,155 @@ export default function PointsPayDetailPage() {
                                     </table>
                                 </div>
 
-                                {awardsByRace.map((group) => (
-                                    <div key={group.race_id} className={custStyles.tableWrap} style={{ marginTop: 20 }}>
-                                        <table className={custStyles.table}>
-                                            <thead>
-                                                <tr>
-                                                    <th colSpan={11} className={custStyles.favoritesHeader}>
-                                                        {group.race_name || group.breakdown_type}
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <thead>
-                                                <tr style={{ background: "#cf920e52" }}>
-                                                    <th colSpan={3} style={{ textAlign: "center", background: "#eeeeee" }}>Position</th>
-                                                    <th colSpan={3} style={{ textAlign: "center", background: "#eeeeee" }}>Competitor</th>
-                                                    <th colSpan={3} style={{ textAlign: "center" }}>Points</th>
-                                                    <th colSpan={2} style={{ textAlign: "center", background: "#d3ebbf" }}>Pay</th>
-                                                </tr>
-                                                <tr>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}>Finish</th>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}>Start</th>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}></th>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}>Car #</th>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}>Primary Driver</th>
-                                                    <th style={{ textAlign: "center", background: "#eeeeee" }}>Co-Driver</th>
-                                                    <th style={{ textAlign: "center" }}>Passing Points</th>
-                                                    <th style={{ textAlign: "center" }}>Finish Points</th>
-                                                    <th style={{ textAlign: "center" }}>Adj</th>
-                                                    <th style={{ textAlign: "center", background: "#d3ebbf" }}>Finish Pay</th>
-                                                    <th style={{ textAlign: "center", background: "#d3ebbf" }}>Adj</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {group.rows.map((award) => (
-                                                    <tr key={award.id}>
-                                                        <td style={{ textAlign: "center" }}>{award.finish_position}</td>
-                                                        <td style={{ textAlign: "center" }}>-</td>
-                                                        <td style={{ textAlign: "center" }}>
-                                                            {award.points_blocked ? <div title="No Points"><FlagOff size={16} /></div> : ""}
-                                                            {award.pay_blocked ? <div title="No Pay"><BanknoteX size={16} /></div> : ""}
-                                                        </td>
-                                                        <td style={{ textAlign: "center" }}>{award.car_number}</td>
-                                                        <td style={{ textAlign: "center" }}>{award.primary_driver_name}</td>
-                                                        <td style={{ textAlign: "center" }}>
-                                                            {award.co_driver_name ? (
-                                                                <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                                                                    <span>{award.co_driver_name}</span>
-                                                                    {award.co_driver_drove ? <CircleGauge size={10} /> : null}
-                                                                </div>
-                                                            ) : ("")}
-                                                        </td>
-                                                        <td style={{ textAlign: "center", background: "#cf920e52" }}>{award.passing_points}</td>
-                                                        <td style={{ textAlign: "center", background: "#cf920e52" }}>
-                                                            {award.points_blocked ? <s>{award.base_points}</s> : award.base_points}
-                                                        </td>
-                                                        <td style={{ textAlign: "center", background: "#cf920e52" }}>
-                                                            <input
-                                                                className={styles.input}
-                                                                style={{
-                                                                    minWidth: 72,
-                                                                    maxWidth: 100,
-                                                                    margin: "0 auto",
-                                                                }}
-                                                                type="number"
-                                                                step="1"
-                                                                value={manualAdjustPoints[award.id] ?? 0}
-                                                                onFocus={() => {
-                                                                    const current = Number(manualAdjustPoints[award.id] ?? 0);
-                                                                    if (current === 0) {
-                                                                        setManualAdjustPoints((prev) => ({
-                                                                            ...prev,
-                                                                            [award.id]: "",
-                                                                        }));
-                                                                    }
-                                                                }}
-                                                                onBlur={() => {
-                                                                    if ((manualAdjustPoints[award.id] ?? "").trim() === "") {
-                                                                        setManualAdjustPoints((prev) => ({
-                                                                            ...prev,
-                                                                            [award.id]: "0",
-                                                                        }));
-                                                                    }
-                                                                }}
-                                                                onChange={(e) =>
-                                                                    setManualAdjustPoints((prev) => ({
-                                                                        ...prev,
-                                                                        [award.id]: e.target.value,
-                                                                    }))
-                                                                }
-                                                            />
-                                                        </td>
-                                                        <td style={{ textAlign: "center", background: "#d3ebbf" }}>
-                                                            {award.pay_blocked ? <s>${award.base_pay}</s> : <>${award.base_pay}</>}
-                                                        </td>
-                                                        <td style={{ textAlign: "center", background: "#d3ebbf" }}>
-                                                            <input
-                                                                className={styles.input}
-                                                                style={{
-                                                                    minWidth: 72,
-                                                                    maxWidth: 100,
-                                                                    margin: "0 auto",
-                                                                }}
-                                                                type="number"
-                                                                step="1"
-                                                                value={manualAdjustPay[award.id] ?? 0}
-                                                                onFocus={() => {
-                                                                    const current = Number(manualAdjustPay[award.id] ?? 0);
-                                                                    if (current === 0) {
-                                                                        setManualAdjustPay((prev) => ({
-                                                                            ...prev,
-                                                                            [award.id]: "",
-                                                                        }));
-                                                                    }
-                                                                }}
-                                                                onBlur={() => {
-                                                                    if ((manualAdjustPay[award.id] ?? "").trim() === "") {
-                                                                        setManualAdjustPay((prev) => ({
-                                                                            ...prev,
-                                                                            [award.id]: "0",
-                                                                        }));
-                                                                    }
-                                                                }}
-                                                                onChange={(e) =>
-                                                                    setManualAdjustPay((prev) => ({
-                                                                        ...prev,
-                                                                        [award.id]: e.target.value,
-                                                                    }))
-                                                                }
-                                                            />
-                                                        </td>
+                                {awardsByRace.map((group) => {
+                                    const showSpinPointsForThisGroup =
+                                        activeClassName.toLowerCase().includes("bump to pass") &&
+                                        group.breakdown_type === "a_feature";
+
+                                    return (
+                                        <div key={group.race_id} className={custStyles.tableWrap} style={{ marginTop: 20 }}>
+                                            <table className={custStyles.table}>
+                                                <thead>
+                                                    <tr>
+                                                        <th colSpan={showSpinPointsForThisGroup ? 12 : 11} className={custStyles.favoritesHeader}>
+                                                            {group.race_name || group.breakdown_type}
+                                                        </th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ))}
+                                                </thead>
+                                                <thead>
+                                                    <tr style={{ background: "#cf920e52" }}>
+                                                        <th colSpan={3} style={{ textAlign: "center", background: "#eeeeee" }}>Position</th>
+                                                        <th colSpan={3} style={{ textAlign: "center", background: "#eeeeee" }}>Competitor</th>
+                                                        <th colSpan={showSpinPointsForThisGroup ? 4 : 3} style={{ textAlign: "center" }}>Points</th>
+                                                        <th colSpan={2} style={{ textAlign: "center", background: "#d3ebbf" }}>Pay</th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}>Finish</th>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}>Start</th>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}></th>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}>Car #</th>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}>Primary Driver</th>
+                                                        <th style={{ textAlign: "center", background: "#eeeeee" }}>Co-Driver</th>
+                                                        <th style={{ textAlign: "center" }}>Passing Points</th>
+                                                        <th style={{ textAlign: "center" }}>Finish Points</th>
+                                                        {showSpinPointsForThisGroup ? (
+                                                            <th style={{ textAlign: "center" }}>Spin Points</th>
+                                                        ) : null}
+                                                        <th style={{ textAlign: "center" }}>Adj</th>
+                                                        <th style={{ textAlign: "center", background: "#d3ebbf" }}>Finish Pay</th>
+                                                        <th style={{ textAlign: "center", background: "#d3ebbf" }}>Adj</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {group.rows.map((award) => (
+                                                        <tr key={award.id}>
+                                                            <td style={{ textAlign: "center" }}>{award.finish_position}</td>
+                                                            <td style={{ textAlign: "center" }}>-</td>
+                                                            <td style={{ textAlign: "center" }}>
+                                                                {award.points_blocked ? <div title="No Points"><FlagOff size={16} /></div> : ""}
+                                                                {award.pay_blocked ? <div title="No Pay"><BanknoteX size={16} /></div> : ""}
+                                                            </td>
+                                                            <td style={{ textAlign: "center" }}>{award.car_number}</td>
+                                                            <td style={{ textAlign: "center" }}>{award.primary_driver_name}</td>
+                                                            <td style={{ textAlign: "center" }}>
+                                                                {award.co_driver_name ? (
+                                                                    <div style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                                                        <span>{award.co_driver_name}</span>
+                                                                        {award.co_driver_drove ? <CircleGauge size={10} /> : null}
+                                                                    </div>
+                                                                ) : ("")}
+                                                            </td>
+                                                            <td style={{ textAlign: "center", background: "#cf920e52" }}>{award.passing_points}</td>
+                                                            <td style={{ textAlign: "center", background: "#cf920e52" }}>
+                                                                {award.points_blocked ? <s>{award.base_points}</s> : award.base_points}
+                                                            </td>
+                                                            {showSpinPointsForThisGroup ? (
+                                                                <td style={{ textAlign: "center", background: "#cf920e52" }}>
+                                                                    {award.points_blocked ? <s>{award.add_points_awarded}</s> : award.add_points_awarded}
+                                                                </td>
+                                                            ) : null}
+                                                            <td style={{ textAlign: "center", background: "#cf920e52" }}>
+                                                                <input
+                                                                    className={styles.input}
+                                                                    style={{
+                                                                        minWidth: 72,
+                                                                        maxWidth: 100,
+                                                                        margin: "0 auto",
+                                                                    }}
+                                                                    type="number"
+                                                                    step="1"
+                                                                    value={manualAdjustPoints[award.id] ?? 0}
+                                                                    onFocus={() => {
+                                                                        const current = Number(manualAdjustPoints[award.id] ?? 0);
+                                                                        if (current === 0) {
+                                                                            setManualAdjustPoints((prev) => ({
+                                                                                ...prev,
+                                                                                [award.id]: "",
+                                                                            }));
+                                                                        }
+                                                                    }}
+                                                                    onBlur={() => {
+                                                                        if ((manualAdjustPoints[award.id] ?? "").trim() === "") {
+                                                                            setManualAdjustPoints((prev) => ({
+                                                                                ...prev,
+                                                                                [award.id]: "0",
+                                                                            }));
+                                                                        }
+                                                                    }}
+                                                                    onChange={(e) =>
+                                                                        setManualAdjustPoints((prev) => ({
+                                                                            ...prev,
+                                                                            [award.id]: e.target.value,
+                                                                        }))
+                                                                    }
+                                                                />
+                                                            </td>
+                                                            <td style={{ textAlign: "center", background: "#d3ebbf" }}>
+                                                                {award.pay_blocked ? <s>${award.base_pay}</s> : <>${award.base_pay}</>}
+                                                            </td>
+                                                            <td style={{ textAlign: "center", background: "#d3ebbf" }}>
+                                                                <input
+                                                                    className={styles.input}
+                                                                    style={{
+                                                                        minWidth: 72,
+                                                                        maxWidth: 100,
+                                                                        margin: "0 auto",
+                                                                    }}
+                                                                    type="number"
+                                                                    step="1"
+                                                                    value={manualAdjustPay[award.id] ?? 0}
+                                                                    onFocus={() => {
+                                                                        const current = Number(manualAdjustPay[award.id] ?? 0);
+                                                                        if (current === 0) {
+                                                                            setManualAdjustPay((prev) => ({
+                                                                                ...prev,
+                                                                                [award.id]: "",
+                                                                            }));
+                                                                        }
+                                                                    }}
+                                                                    onBlur={() => {
+                                                                        if ((manualAdjustPay[award.id] ?? "").trim() === "") {
+                                                                            setManualAdjustPay((prev) => ({
+                                                                                ...prev,
+                                                                                [award.id]: "0",
+                                                                            }));
+                                                                        }
+                                                                    }}
+                                                                    onChange={(e) =>
+                                                                        setManualAdjustPay((prev) => ({
+                                                                            ...prev,
+                                                                            [award.id]: e.target.value,
+                                                                        }))
+                                                                    }
+                                                                />
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    );
+                                })}
 
                                 {calcResult?.totals?.length ? (
                                     <div className={custStyles.tableWrap} style={{ marginTop: 20 }}>

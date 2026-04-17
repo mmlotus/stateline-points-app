@@ -10,10 +10,7 @@ import toast from "react-hot-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import Pagination from "@/components/Pagination";
 import { useSortableData } from "@/lib/useSortableData";
-
-function isoDate(value: string) {
-    return (value || "").slice(0, 10);
-}
+import { formatDate } from "@/components/Formatter";
 
 export default function ClassesPage() {
     const router = useRouter();
@@ -133,10 +130,10 @@ export default function ClassesPage() {
                         ) : (
                             paginatedClasses.map((classItem) => (
                         <tr key={classItem.id}>
-                            <td>{classItem.name}</td>
+                            <td>{`${classItem.class_sponsor} ${classItem.name}`}</td>
                             <td style={{ textAlign: "center" }}>{classItem.default_points_scheme_name}</td>
                             <td style={{ textAlign: "center" }}>{classItem.default_pay_scheme_name}</td>
-                            <td style={{ textAlign: "center" }}>{isoDate(classItem.created_at)}</td>
+                            <td style={{ textAlign: "center" }}>{formatDate(classItem.created_at)}</td>
                             <td className={custStyles.right}>
                                 <button
                                     className={styles.iconButton}

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useEffect, useRef, useState } from "react";
 import { Save } from "lucide-react";
 import TagSelector from "../TagSelector";
+import { getClassDisplayName } from "@/lib/getClassName";
 
 export default function EventEditor({
     seasonId,
@@ -172,9 +173,12 @@ export default function EventEditor({
                         options={classes.map((c) => c.id)}
                         selected={selectedClassIds}
                         onChange={setSelectedClassIds}
-                        labelForValue={(val) =>
-                            classes.find((c) => c.id === val)?.name || val
-                        }
+                        labelForValue={(val) => {
+                            const cls = classes.find((c) => c.id === val);
+                            if (!cls) return val;
+
+                            return getClassDisplayName(cls);
+                        }}
                     />
                 </div>
 

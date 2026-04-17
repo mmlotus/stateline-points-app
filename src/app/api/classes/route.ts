@@ -7,6 +7,7 @@ export async function GET() {
             SELECT
                 c.id,
                 c.name,
+                c.class_sponsor,
                 c.created_at,
                 c.default_points_scheme_id,
                 c.default_pay_scheme_id,
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
 
         const name = body?.name?.trim();
+        const class_sponsor = body?.class_sponsor?.trim() || "";
         const default_points_scheme_id = body?.default_points_scheme_id || null;
         const default_pay_scheme_id = body?.default_pay_scheme_id || null;
 
@@ -62,15 +64,17 @@ export async function POST(req: NextRequest) {
         const inserted = await sql`
             INSERT INTO classes (
                 name,
+                class_sponsor,
                 default_points_scheme_id,
                 default_pay_scheme_id    
             )
             VALUES (
                 ${name},
+                ${class_sponsor},
                 ${default_points_scheme_id},
                 ${default_pay_scheme_id}
             )
-            RETURNING id, name, created_at, default_points_scheme_id, default_pay_scheme_id
+            RETURNING id, name, class_sponsor, created_at, default_points_scheme_id, default_pay_scheme_id
         `;
 
         return NextResponse.json(inserted[0], { status: 201 });

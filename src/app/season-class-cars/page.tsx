@@ -9,6 +9,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { Pencil, Trash } from "lucide-react";
 import Pagination from "@/components/Pagination";
 import { useSortableData } from "@/lib/useSortableData";
+import { getClassDisplayName } from "@/lib/getClassName";
 
 export default function SeasonClassCarsPage() {
     const [seasons, setSeasons] = useState<Season[]>([]);
@@ -285,7 +286,7 @@ export default function SeasonClassCarsPage() {
                                 <option value="">All classes</option>
                                 {classes.map((cls) => (
                                     <option key={cls.id} value={cls.id}>
-                                        {cls.name}
+                                        {getClassDisplayName(cls)}
                                     </option>
                                 ))}
                             </select>
@@ -345,7 +346,7 @@ export default function SeasonClassCarsPage() {
                                 <option value="">Select class</option>
                                 {classes.map((cls) => (
                                     <option key={cls.id} value={cls.id}>
-                                        {cls.name}
+                                        {getClassDisplayName(cls)}
                                     </option>
                                 ))}
                             </select>
@@ -472,7 +473,7 @@ export default function SeasonClassCarsPage() {
                         ) : (
                             paginatedRows.map((row) => (
                                 <tr key={row.id}>
-                                    <td>{row.class_name}</td>
+                                    <td>{row.class_sponsor ? `${row.class_sponsor} ${row.class_name}` : row.class_name}</td>
                                     <td>{row.car_number}</td>
                                     <td>{row.primary_driver_name}</td>
                                     <td>{row.co_driver_name || "-"}</td>

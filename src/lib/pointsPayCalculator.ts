@@ -390,11 +390,19 @@ export function calcResultAward(args: {
     // placeholder because currently starting position is not factored in (would become relevant if we added LINEUPS to the app)
     const passing_points = 0;
 
+    // specialty points
+    const add_points_awarded =
+        pointsScheme?.type === "points" &&
+        pointsScheme.add_points_enabled &&
+        breakdownType === "a_feature"
+            ? toNumber(result.add_points_value)
+            : 0;
+
     // event_entries can block points/pay independently of whatever the scheme says
     const points_blocked = result.no_points;
     const pay_blocked = result.no_pay;
 
-    const awarded_points = points_blocked ? 0 : base_points + show_up_points + passing_points;
+    const awarded_points = points_blocked ? 0 : base_points + show_up_points + passing_points + add_points_awarded;
     const awarded_pay = pay_blocked ? 0 : base_pay + show_up_pay;
 
     return {
@@ -405,6 +413,7 @@ export function calcResultAward(args: {
         base_points,
         show_up_points,
         passing_points,
+        add_points_awarded,
         awarded_points,
 
         base_pay,

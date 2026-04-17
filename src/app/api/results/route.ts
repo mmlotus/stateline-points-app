@@ -23,6 +23,7 @@ export async function GET(req: Request) {
                 r.dq,
                 r.bf,
                 r.transferred,
+                r.add_points_value,
                 r.notes,
                 r.created_at,
 
@@ -165,7 +166,7 @@ export async function PUT(req: Request) {
 
                 await sql`
                     INSERT INTO results (
-                        race_id, entry_id, finish_position, dns, dnf, dq, bf, transferred, notes
+                        race_id, entry_id, finish_position, dns, dnf, dq, bf, transferred, add_points_value, notes
                     )
                     VALUES (
                         ${race_id}, ${row.entry_id}, ${i + 1},
@@ -174,6 +175,7 @@ export async function PUT(req: Request) {
                         ${row.dq ?? false},
                         ${row.bf ?? false},
                         ${row.transferred ?? false},
+                        ${row.add_points_value ?? 0},
                         ${row.notes ?? null}
                     )
                     ON CONFLICT (race_id, entry_id)
@@ -184,6 +186,7 @@ export async function PUT(req: Request) {
                         dq = EXCLUDED.dq,
                         bf = EXCLUDED.bf,
                         transferred = EXCLUDED.transferred,
+                        add_points_value = EXCLUDED.add_points_value,
                         notes = EXCLUDED.notes
                 `;
             }
@@ -207,6 +210,7 @@ export async function PUT(req: Request) {
                     r.dq,
                     r.bf,
                     r.transferred,
+                    r.add_points_value,
                     r.notes,
                     r.created_at,
 

@@ -74,6 +74,7 @@ export type SeasonClassCar = {
 
 export type SeasonClassCarWithNames = SeasonClassCar & {
     class_name: string;
+    class_sponsor?: string | null;
     primary_driver_name: string;
     co_driver_name: string | null;
 };
@@ -111,6 +112,7 @@ export type EventClass = {
 
 export type EventClassWithClassName = EventClass & {
     class_name?: string;
+    class_sponsor?: string | null;
 };
 
 
@@ -118,6 +120,7 @@ export type EventClassWithClassName = EventClass & {
 export type Class = {
     id: string;
     name: string;
+    class_sponsor?: string | null;
     created_at: string;
     default_points_scheme_id?: string | null;
     default_pay_scheme_id?: string | null;
@@ -245,6 +248,7 @@ export type ResultRow = {
     bf: boolean;
     transferred: boolean;
     notes: string | null;
+    add_points_value: number | "";
     created_at: string;
 };
 
@@ -278,6 +282,7 @@ export type ResultInput = {
     dq: boolean;
     bf: boolean;
     transferred: boolean;
+    add_points_value: number;
     notes?: string | null;
 };
 

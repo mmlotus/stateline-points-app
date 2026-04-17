@@ -247,6 +247,17 @@ export default function EventResultsPage() {
             });
     }, [entries, eventClasses, selectedEventClassId]);
 
+    const showSpinsField = useMemo(() => {
+        const activeEventClass = eventClasses.find((c) => c.id === selectedEventClassId);
+        const className = (activeEventClass?.class_name || "").trim().toLowerCase();
+        const raceName = (selectedRace?.name || "").trim().toLowerCase();
+
+        const isBumpToPass = className.includes("bump to pass");
+        const isMainEvent = raceName.includes("a main");
+
+        return isBumpToPass && isMainEvent;
+    }, [eventClasses, selectedEventClassId, selectedRace]);
+
     useEffect(() => {
         if (!classEntries.length) {
             setSelectedEntryId("");
@@ -279,6 +290,7 @@ export default function EventResultsPage() {
                 dq: false,
                 bf: false,
                 transferred: false,
+                add_points_value: 0,
                 notes: null,
                 created_at: new Date().toISOString(),
 
@@ -373,8 +385,8 @@ export default function EventResultsPage() {
 
     function updateResultField(
         entryId: string,
-        field: "dns" | "dnf" | "dq" | "bf" | "transferred" | "notes",
-        value: boolean | string
+        field: "dns" | "dnf" | "dq" | "bf" | "transferred" | "notes" | "add_points_value",
+        value: boolean | string | number
     ) {
         setRaceResults((prev) =>
             prev.map((row) =>
@@ -416,6 +428,7 @@ export default function EventResultsPage() {
                     dq: row.dq,
                     bf: row.bf,
                     transferred: row.transferred,
+                    add_points_value: Number(row.add_points_value ?? 0),
                     notes: row.notes ?? null,
                 })),
             };
@@ -514,7 +527,7 @@ export default function EventResultsPage() {
                                         }
                                         onClick={() => setSelectedEventClassId(cls.id)}
                                     >
-                                        {cls.class_name || "Unnamed Class"}
+                                        {cls.class_sponsor ? `${cls.class_sponsor} ${cls.class_name}` : cls.class_name}
                                     </button>
                                 ))}
                             </div>
@@ -687,17 +700,18 @@ export default function EventResultsPage() {
                                                 <table className={custStyles.table}>
                                                     <thead>
                                                         <tr>
-                                                            <th style={{ width: 44 }}></th>
-                                                            <th style={{ width: 70 }}>Pos</th>
-                                                            <th style={{ width: 90 }}>#</th>
+                                                            <th style={{ textAlign: "center", width: 44 }}></th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>Pos</th>
+                                                            <th style={{ textAlign: "center", width: 90 }}>#</th>
                                                             <th>Driver</th>
-                                                            <th style={{ width: 70 }}>DNS</th>
-                                                            <th style={{ width: 70 }}>DNF</th>
-                                                            <th style={{ width: 70 }}>DQ</th>
-                                                            <th style={{ width: 70 }}>BF</th>
-                                                            <th style={{ width: 70 }}>Transfer?</th>
-                                                            <th style={{ width: 500 }}>Notes</th>
-                                                            <th style={{ width: 90 }}></th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>DNS</th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>DNF</th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>DQ</th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>BF</th>
+                                                            <th style={{ textAlign: "center", width: 70 }}>Transfer?</th>
+                                                            {showSpinsField ? <th style={{ textAlign: "center", width: 90 }}>Spins</th> : null}
+                                                            <th style={{ width: showSpinsField ? 390 : 500 }}>Notes</th>
+                                                            <th style={{ width: 70 }}></th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -721,8 +735,8 @@ export default function EventResultsPage() {
                                                                         className={styles.iconButton}
                                                                     />
                                                                 </td>
-                                                                <td>{index + 1}</td>
-                                                                <td>{row.car_number}</td>
+                                                                <td style={{ textAlign: "center" }}>{index + 1}</td>
+                                                                <td style={{ textAlign: "center" }}>{row.car_number}</td>
                                                                 <td>
                                                                     <div className={custStyles.name}>
                                                                         {row.primary_driver_name}
@@ -738,7 +752,7 @@ export default function EventResultsPage() {
                                                                         )}
                                                                     </div>
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={row.dns}
@@ -746,7 +760,7 @@ export default function EventResultsPage() {
                                                                         title="DNS"
                                                                     />
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={row.dnf}
@@ -754,7 +768,7 @@ export default function EventResultsPage() {
                                                                         title="DNF"
                                                                     />
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={row.dq}
@@ -762,7 +776,7 @@ export default function EventResultsPage() {
                                                                         title="DQ"
                                                                     />
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={row.bf}
@@ -770,7 +784,7 @@ export default function EventResultsPage() {
                                                                         title="BF"
                                                                     />
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <input
                                                                         type="checkbox"
                                                                         checked={row.transferred}
@@ -778,6 +792,36 @@ export default function EventResultsPage() {
                                                                         title="Transfer"
                                                                     />
                                                                 </td>
+                                                                {showSpinsField ? (
+                                                                    <td style={{ textAlign: "center" }}>
+                                                                        <input
+                                                                            className={styles.input}
+                                                                            type="number"
+                                                                            min={0}
+                                                                            step={1}
+                                                                            value={row.add_points_value ?? 0}
+                                                                            onFocus={() => {
+                                                                                const current = Number(row.add_points_value ?? 0);
+                                                                                if (current === 0) {
+                                                                                    updateResultField(row.entry_id, "add_points_value", "");
+                                                                                }
+                                                                            }}
+                                                                            onBlur={() => {
+                                                                                if (String(row.add_points_value ?? "").trim() === "") {
+                                                                                    updateResultField(row.entry_id, "add_points_value", 0);
+                                                                                }
+                                                                            }}
+                                                                            onChange={(e) =>
+                                                                                updateResultField(
+                                                                                    row.entry_id,
+                                                                                    "add_points_value",
+                                                                                    e.target.value === "" ? "" : Number(e.target.value || 0)
+                                                                                )
+                                                                            }
+                                                                            style={{ maxWidth: 90 }}
+                                                                        />
+                                                                    </td>
+                                                                ) : null}
                                                                 <td>
                                                                     <input
                                                                         className={styles.input}
@@ -786,7 +830,7 @@ export default function EventResultsPage() {
                                                                         placeholder="Optional notes"
                                                                     />
                                                                 </td>
-                                                                <td>
+                                                                <td style={{ textAlign: "center" }}>
                                                                     <button
                                                                         type="button"
                                                                         className={styles.iconButton}

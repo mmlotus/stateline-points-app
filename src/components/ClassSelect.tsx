@@ -75,7 +75,7 @@ export default function ClassSelect({
                                 }`}
                             onClick={() => handleSelect(c.id)}
                         >
-                            {c.class_name}
+                            {c.class_sponsor ? `${c.class_sponsor} ${c.class_name}` : c.class_name}
                         </div>
                     ))}
                 </div>
