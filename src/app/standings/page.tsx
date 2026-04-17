@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Class, Season, StandingRow } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate, todayDate } from "@/components/Formatter";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, History } from "lucide-react";
 import { getClassDisplayName } from "@/lib/getClassName";
 
 export default function StandingsPage() {
@@ -323,7 +323,7 @@ export default function StandingsPage() {
                         <tr>
                             <th colSpan={4} className={custStyles.favoritesHeader}>{selectedClass}</th>
                             <th
-                                colSpan={1}
+                                colSpan={2}
                                 className={custStyles.favoritesHeader}
                                 style={{
                                     fontSize: 14,
@@ -341,13 +341,14 @@ export default function StandingsPage() {
                             <th style={{ textAlign: "center" }}>Competitor/Team</th>
                             <th style={{ textAlign: "center" }}>Points</th>
                             <th style={{ textAlign: "center" }}>Earnings</th>
+                            <th style={{ textAlign: "center", width: 40 }}></th>
                         </tr>
                     </thead>
                     <tbody>
                         {!filteredStandings.length ? (
                             <tr>
                                 <td
-                                    colSpan={5}
+                                    colSpan={6}
                                     className={styles.muted}
                                     style={{
                                         textAlign: "center",
@@ -370,6 +371,18 @@ export default function StandingsPage() {
                                     </td>
                                     <td style={{ textAlign: "center" }}>{row.total_points}</td>
                                     <td style={{ textAlign: "center" }}>${row.total_pay}</td>
+                                    <td className={custStyles.right} style={{ width: 40 }}>
+                                        <button
+                                            className={styles.iconButton}
+                                            onClick={() =>
+                                                router.push(`/driver-history/${selectedSeasonId}/${row.season_class_car_id}`)
+                                            }
+                                            aria-label="See driver history"
+                                            title="See driver's events"
+                                        >
+                                            <History size={16} />
+                                        </button>
+                                    </td>
                                 </tr>
                             ))
                         )}

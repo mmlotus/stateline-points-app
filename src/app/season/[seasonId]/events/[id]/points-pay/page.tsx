@@ -3,7 +3,7 @@
 import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import toast from "react-hot-toast";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Class, EventClassWithClassName, EventRow, PointsPayCalculationResponse, Scheme } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -13,6 +13,8 @@ import { BanknoteX, CircleGauge, FlagOff, Save } from "lucide-react";
 export default function PointsPayDetailPage() {
     const router = useRouter();
     const params = useParams<{ seasonId: string; id: string }>();
+    const searchParams = useSearchParams();
+    const classIdFromUrl = searchParams.get("class_id") || "";
 
     const eventId = params.id;
     const seasonId = params.seasonId;
@@ -107,7 +109,13 @@ export default function PointsPayDetailPage() {
                 setAllClasses(classesJson);
 
                 if (eventClassesJson.length > 0) {
-                    setSelectedEventClassId(eventClassesJson[0].class_id);
+                    const matchedClass = classIdFromUrl
+                        ? eventClassesJson.find((c: EventClassWithClassName) => c.class_id === classIdFromUrl)
+                        : null;
+
+                    setSelectedEventClassId(
+                        matchedClass?.class_id || eventClassesJson[0].class_id
+                    );
                 }
             } catch (error) {
                 console.error(error);
@@ -119,7 +127,7 @@ export default function PointsPayDetailPage() {
         }
 
         if (eventId) loadPage();
-    }, [eventId, router]);
+    }, [eventId, router, classIdFromUrl]);
 
     useEffect(() => {
         async function loadSavedCalculations() {
