@@ -317,7 +317,7 @@ export default function StandingsPage() {
                 </div>
             </div>
 
-            <div className={custStyles.tableWrap}>
+            <div className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
                 <table className={custStyles.table}>
                     <thead>
                         <tr>

@@ -549,7 +549,7 @@ export default function PointsPayDetailPage() {
                             </p>
                         ) : (
                             <>
-                                <div className={custStyles.tableWrap}>
+                                <div className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
                                     <table className={custStyles.table}>
                                         <thead>
                                             <tr>

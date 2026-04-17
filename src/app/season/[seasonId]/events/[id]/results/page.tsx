@@ -673,7 +673,7 @@ export default function EventResultsPage() {
                                     <p className={styles.muted}>Loading results...</p>
                                 ) : (
                                     <>
-                                        <div className={custStyles.tableWrap}>
+                                        <div className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
                                             <div className={custStyles.secondHeader}>
                                                 <input
                                                     className={styles.input}
