@@ -549,7 +549,7 @@ export default function PointsPayDetailPage() {
                             </p>
                         ) : (
                             <>
-                                <div className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
+                                <div className={custStyles.tableWrap}>
                                     <table className={custStyles.table}>
                                         <thead>
                                             <tr>
@@ -746,7 +746,7 @@ export default function PointsPayDetailPage() {
                                 })}
 
                                 {calcResult?.totals?.length ? (
-                                    <div className={custStyles.tableWrap} style={{ marginTop: 20 }}>
+                                    <div className={custStyles.tableWrap} style={{ marginTop: 20, marginBottom: 75 }}>
                                         <table className={custStyles.table}>
                                             <thead>
                                                 <tr>
