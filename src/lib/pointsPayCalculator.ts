@@ -362,23 +362,7 @@ export function calcResultAward(args: {
         }
     }
 
-    let base_points = excludeTransferPoints ? 0 : applyResultModifier(rawBasePoints, pointsModifier);
-
-    // event_entries can block points/pay independently of whatever the scheme says
-    const points_blocked = result.no_points;
-    const pay_blocked = result.no_pay;
-
-    // extra point for heat winner for Bump To Pass
-    const heat_win_bonus_points =
-        pointsScheme?.type === "points" &&
-        breakdownType === "heat" &&
-        pointsAwardPos === 1 &&
-        result.class_name?.toLowerCase().includes("bump to pass")
-            ? 1 : 0;
-
-    if (!points_blocked && heat_win_bonus_points) {
-        base_points += 1;
-    }
+    const base_points = excludeTransferPoints ? 0 : applyResultModifier(rawBasePoints, pointsModifier);
 
     if (payBreakdown && isFeatureBreakdownType(breakdownType)) {
         const ladderPosition = getEffectiveLadderPos({
@@ -414,6 +398,10 @@ export function calcResultAward(args: {
             ? toNumber(result.add_points_value)
             : 0;
 
+    // event_entries can block points/pay independently of whatever the scheme says
+    const points_blocked = result.no_points;
+    const pay_blocked = result.no_pay;
+
     const awarded_points = points_blocked ? 0 : base_points + show_up_points + passing_points + add_points_awarded;
     const awarded_pay = pay_blocked ? 0 : base_pay + show_up_pay;
 
@@ -426,7 +414,6 @@ export function calcResultAward(args: {
         show_up_points,
         passing_points,
         add_points_awarded,
-        heat_win_bonus_points,
         awarded_points,
 
         base_pay,
