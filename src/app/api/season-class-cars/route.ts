@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import sql from "@/lib/db";
-import { SeasonClassCarCreatePayload, SeasonClassCarUpdatePayload } from "@/types";
+import { isRookieStatus, SeasonClassCarCreatePayload, SeasonClassCarUpdatePayload } from "@/types";
 import { hasErrorCode } from "@/lib/api-errors";
 
 async function driverHasClassConflict(
@@ -112,6 +112,7 @@ export async function GET(req: Request) {
                     scc.co_driver_id,
                     cd.name AS co_driver_name,
                     scc.is_active,
+                    scc.rookie_status,
                     scc.created_at,
                     scc.updated_at
                 FROM season_class_cars scc
@@ -139,6 +140,7 @@ export async function GET(req: Request) {
                     scc.co_driver_id,
                     cd.name AS co_driver_name,
                     scc.is_active,
+                    scc.rookie_status,
                     scc.created_at,
                     scc.updated_at
                 FROM season_class_cars scc
@@ -173,7 +175,11 @@ export async function POST(req: Request) {
             primary_driver_id,
             co_driver_id,
             is_active,
+            rookie_status,
         } = body ?? {};
+
+        const submittedRookieStatus = rookie_status?.trim();
+        const safeRookieStatus = isRookieStatus(submittedRookieStatus) ? submittedRookieStatus : "unknown";
 
         if (!season_id || !class_id || !car_number || !primary_driver_id) {
             return NextResponse.json(
@@ -197,7 +203,8 @@ export async function POST(req: Request) {
                 car_number,
                 primary_driver_id,
                 co_driver_id,
-                is_active
+                is_active,
+                rookie_status
             )
             VALUES (
                 ${season_id},
@@ -205,7 +212,8 @@ export async function POST(req: Request) {
                 ${car_number.trim()},
                 ${primary_driver_id},
                 ${co_driver_id || null},
-                ${typeof is_active === "boolean" ? is_active : true}
+                ${typeof is_active === "boolean" ? is_active : true},
+                ${safeRookieStatus}
             )
             RETURNING *
         `;
@@ -239,7 +247,15 @@ export async function PATCH(req: Request) {
             primary_driver_id,
             co_driver_id,
             is_active,
+            rookie_status,
         } = body ?? {};
+
+        const submittedRookieStatus = rookie_status?.trim();
+        const safeRookieStatus = typeof submittedRookieStatus === "string"
+            ? isRookieStatus(submittedRookieStatus)
+                ? submittedRookieStatus
+                : "unknown"
+            : null;
 
         if (!id || !season_id || !class_id || !car_number || !primary_driver_id) {
             return NextResponse.json(
@@ -264,7 +280,8 @@ export async function PATCH(req: Request) {
                 car_number = ${car_number.trim()},
                 primary_driver_id = ${primary_driver_id},
                 co_driver_id = ${co_driver_id || null},
-                is_active = ${is_active}
+                is_active = ${is_active},
+                rookie_status = COALESCE(${safeRookieStatus}, rookie_status)
             WHERE id = ${id}
             RETURNING *
         `;

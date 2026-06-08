@@ -4,18 +4,20 @@ import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import toast from "react-hot-toast";
 import { useEffect, useMemo, useState } from "react";
-import { Class, Driver, Season, SeasonClassCarWithNames } from "@/types";
+import { Class, Driver, isRookieStatus, RookieStatus, Season, SeasonClassCarWithNames } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Pencil, Trash } from "lucide-react";
 import Pagination from "@/components/Pagination";
 import { useSortableData } from "@/lib/useSortableData";
 import { getClassDisplayName } from "@/lib/getClassName";
+import { RookieBadge } from "@/components/RookieStatus";
 
 export default function SeasonClassCarsPage() {
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [classes, setClasses] = useState<Class[]>([]);
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [rows, setRows] = useState<SeasonClassCarWithNames[]>([]);
+    const [rookieStatus, setRookieStatus] = useState<RookieStatus>("unknown");
 
     const [selectedSeasonId, setSelectedSeasonId] = useState("");
     const [selectedClassId, setSelectedClassId] = useState("");
@@ -32,6 +34,7 @@ export default function SeasonClassCarsPage() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+    const [rookieFilter, setRookieFilter] = useState<"all" | "unknown" | "race_1" | "race_2" | "race_3" | "cleared">("all");
 
     const filteredRows = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
@@ -54,9 +57,15 @@ export default function SeasonClassCarsPage() {
                 (statusFilter === "active" && row.is_active) ||
                 (statusFilter === "inactive" && !row.is_active);
 
-            return matchesSearch && matchesStatus;
+            const rowRookieStatus = row.rookie_status || "unknown";
+
+            const matchesRookieStatus =
+                rookieFilter === "all" ||
+                rowRookieStatus === rookieFilter;
+
+            return matchesSearch && matchesStatus && matchesRookieStatus;
         });
-    }, [rows, searchTerm, statusFilter]);
+    }, [rows, searchTerm, statusFilter, rookieFilter]);
 
     const {
         SortHeader,
@@ -127,6 +136,7 @@ export default function SeasonClassCarsPage() {
         setPrimaryDriverId("");
         setCoDriverId("");
         setIsActive(true);
+        setRookieStatus("unknown");
     }
 
     function startEdit(row: SeasonClassCarWithNames) {
@@ -137,6 +147,7 @@ export default function SeasonClassCarsPage() {
         setPrimaryDriverId(row.primary_driver_id);
         setCoDriverId(row.co_driver_id || "");
         setIsActive(row.is_active);
+        setRookieStatus(row.rookie_status || "unknown");
     }
 
     async function handleSave() {
@@ -164,6 +175,7 @@ export default function SeasonClassCarsPage() {
                     primary_driver_id: primaryDriverId,
                     co_driver_id: coDriverId || null,
                     is_active: isActive,
+                    rookie_status: rookieStatus || "unknown",
                 }),
             });
 
@@ -240,7 +252,7 @@ export default function SeasonClassCarsPage() {
 
     useEffect(() => {
         setCurrentPage(1);
-    }, [searchTerm, statusFilter, setCurrentPage]);
+    }, [searchTerm, statusFilter, rookieFilter, setCurrentPage]);
 
     if (loading) return <LoadingSpinner />
 
@@ -317,6 +329,25 @@ export default function SeasonClassCarsPage() {
                                 <option value="all">All drivers</option>
                                 <option value="active">Active Only</option>
                                 <option value="inactive">Inactive Only</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label className={styles.label}>Filter Rookie Status</label>
+                            <select
+                                className={styles.input}
+                                value={rookieFilter}
+                                onChange={(e) =>
+                                    setRookieFilter(e.target.value as "all" | "unknown" | "race_1" | "race_2" | "race_3" | "cleared")
+                                }
+                                style={{ minWidth: "180px" }}
+                            >
+                                <option value="all">All drivers</option>
+                                <option value="unknown">Unassigned Rookie Status</option>
+                                <option value="race_1">1 Race Only</option>
+                                <option value="race_2">2 Races Only</option>
+                                <option value="race_3">3 Races Only</option>
+                                <option value="cleared">Non-Rookies Only</option>
                             </select>
                         </div>
                     </div>
@@ -408,6 +439,25 @@ export default function SeasonClassCarsPage() {
                                 <option value="false">Inactive</option>
                             </select>
                         </div>
+
+                        <div>
+                            <label className={styles.label}>Rookie Status</label>
+                            <select
+                                className={styles.input}
+                                value={rookieStatus}
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    setRookieStatus(isRookieStatus(value) ? value : "unknown");
+                                }}
+                                disabled={!selectedSeasonId}
+                            >
+                                <option value="unknown">Unknown</option>
+                                <option value="race_1">1st Race</option>
+                                <option value="race_2">2nd Race</option>
+                                <option value="race_3">3rd Race</option>
+                                <option value="cleared">Cleared</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div className={custStyles.tools} style={{ marginTop: 16 }}>
@@ -475,7 +525,19 @@ export default function SeasonClassCarsPage() {
                                 <tr key={row.id}>
                                     <td>{row.class_sponsor ? `${row.class_sponsor} ${row.class_name}` : row.class_name}</td>
                                     <td>{row.car_number}</td>
-                                    <td>{row.primary_driver_name}</td>
+                                    <td>
+                                        <span
+                                            style={{
+                                                display: "inline-flex",
+                                                alignItems: "center",
+                                                gap: 4,
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {row.primary_driver_name}
+                                            <RookieBadge status={row.rookie_status} />
+                                        </span>
+                                    </td>
                                     <td>{row.co_driver_name || "-"}</td>
                                     <td>{row.is_active ? "Yes" : "-"}</td>
                                     <td>

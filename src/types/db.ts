@@ -68,6 +68,7 @@ export type SeasonClassCar = {
     primary_driver_id: string;
     co_driver_id: string | null;
     is_active: boolean;
+    rookie_status: RookieStatus;
     created_at: string;
     updated_at: string;
 };
@@ -86,6 +87,7 @@ export type SeasonClassCarCreatePayload = {
     primary_driver_id: string;
     co_driver_id?: string | null;
     is_active?: boolean;
+    rookie_status?: RookieStatus;
 };
 
 export type SeasonClassCarUpdatePayload = SeasonClassCarCreatePayload & {
@@ -100,6 +102,19 @@ export type QuickAddEntryPayload = Omit<
         primary_driver_name?: string;
         override_car_number?: string | null;
     };
+
+export const ROOKIE_STATUS_OPTIONS = [
+    "unknown", "race_1", "race_2", "race_3", "cleared",
+] as const;
+
+export type RookieStatus = (typeof ROOKIE_STATUS_OPTIONS)[number];
+
+export function isRookieStatus(value: unknown): value is RookieStatus {
+    return (
+        typeof value === "string" &&
+        ROOKIE_STATUS_OPTIONS.includes(value as RookieStatus)
+    );
+}
 
 
 /* EVENT CLASSES */
@@ -158,6 +173,7 @@ export type EventEntryWithDetails = EventEntry & {
     co_driver_id: string | null;
     co_driver_name: string | null;
     is_active: boolean;
+    rookie_status: RookieStatus;
 };
 
 export type EventEntryCreatePayload = {

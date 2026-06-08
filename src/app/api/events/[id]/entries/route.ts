@@ -31,6 +31,7 @@ export async function GET(_req: Request, context: RouteContext) {
 
                 scc.season_id,
                 scc.class_id,
+                scc.rookie_status,
                 c.name AS class_name,
                 scc.car_number AS registration_car_number,
                 COALESCE(ee.override_car_number, scc.car_number) AS car_number,

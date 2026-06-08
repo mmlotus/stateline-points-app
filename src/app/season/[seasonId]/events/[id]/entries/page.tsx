@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate } from "@/components/Formatter";
 import { ChevronDown, ChevronUp, Pencil, SaveIcon, Trash } from "lucide-react";
 import BasicModal from "@/components/Modals/PopupModal";
+import { RookieBadge } from "@/components/RookieStatus";
 
 export default function EventEntriesPage() {
     const router = useRouter();
@@ -1080,7 +1081,12 @@ export default function EventEntriesPage() {
                                             {filteredEntries.map((entry) => (
                                                 <tr key={entry.id}>
                                                     <td style={{ textAlign: "center" }}>{entry.car_number}</td>
-                                                    <td style={{ textAlign: "center" }}>{entry.primary_driver_name}</td>
+                                                    <td style={{ textAlign: "center" }}>
+                                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 4, whiteSpace: "nowrap" }}>
+                                                            {entry.primary_driver_name}
+                                                            <RookieBadge status={entry.rookie_status} />
+                                                        </span>
+                                                    </td>
                                                     <td style={{ textAlign: "center" }}>{entry.co_driver_name || "-"}</td>
                                                     <td style={{ textAlign: "center" }}>
                                                         <input
