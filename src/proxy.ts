@@ -18,7 +18,7 @@ export async function proxy(req: NextRequest) {
         pathname === "/login" ||
         pathname === "/privacy" ||
         pathname === "/terms" ||
-        pathname === "/standings" ||
+        pathname.startsWith("/standings") ||
         /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf)$/i.test(pathname)
     ) {
         return NextResponse.next();
