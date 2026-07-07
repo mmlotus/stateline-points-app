@@ -1,7 +1,7 @@
 "use client";
 
 import { Season } from "@/types";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "@/styles/CustomSelect.module.css";
@@ -15,7 +15,6 @@ export default function SeasonSelect({
 }) {
     const router = useRouter();
     const pathname = usePathname();
-    const searchParams = useSearchParams();
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const { data: session, status } = useSession();
@@ -47,14 +46,16 @@ export default function SeasonSelect({
             const all = (await allRes.json()) as Season[];
             const active = (await activeRes.json()) as Season | null;
 
-            const seasonIdFromUrl = searchParams.get("season_id");
+            const seasonIdFromUrl = isStandingsPage
+                ? new URLSearchParams(window.location.search).get("season_id")
+                : null;
 
             setSeasons(all);
             setActiveSeasonId(seasonIdFromUrl || active?.id || all[0]?.id || null);
         } catch {
             toast.error("Failed to load seasons");
         }
-    }, [isStandingsPage, searchParams]);
+    }, [isStandingsPage]);
 
     useEffect(() => {
         if (!showSeasonSelect) return;
@@ -105,7 +106,15 @@ export default function SeasonSelect({
         if (isStandingsPage) {
             setActiveSeasonId(seasonId);
             setOpen(false);
+
             router.push(`/standings?season_id=${seasonId}`);
+
+            window.dispatchEvent(
+                new CustomEvent("standings-season-selected", {
+                    detail: { seasonId },
+                })
+            );
+            
             return;
         }
 

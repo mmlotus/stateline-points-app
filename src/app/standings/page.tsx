@@ -4,7 +4,7 @@ import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import selectStyles from "@/styles/CustomSelect.module.css";
 import toast from "react-hot-toast";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Class, Season, StandingRow } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -15,8 +15,6 @@ import { useSession } from "next-auth/react";
 
 export default function StandingsPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const seasonIdFromUrl = searchParams.get("season_id");
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     const { status } = useSession();
@@ -26,6 +24,7 @@ export default function StandingsPage() {
 
     const [season, setSeason] = useState<Season | null>(null);
     const [selectedSeasonId, setSelectedSeasonId] = useState("");
+    const [seasonIdFromUrl, setSeasonIdFromUrl] = useState<string | null | undefined>(undefined);
 
     const [allClasses, setAllClasses] = useState<Class[]>([]);
     const [selectedClassId, setSelectedClassId] = useState("");
@@ -83,7 +82,31 @@ export default function StandingsPage() {
         });
     }, [rankedStandings, selectedClassId, searchTerm]);
 
+    useEffect(() => {
+        function readSeasonIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            setSeasonIdFromUrl(params.get("season_id"));
+        }
+
+        function handleStandingsSeasonSelected(e: Event) {
+            const customEvent = e as CustomEvent<{ seasonId: string }>;
+            setSeasonIdFromUrl(customEvent.detail.seasonId);
+        }
+
+        readSeasonIdFromUrl();
+
+        window.addEventListener("standings-season-selected", handleStandingsSeasonSelected);
+        window.addEventListener("popstate", readSeasonIdFromUrl);
+
+        return () => {
+            window.removeEventListener("standings-season-selected", handleStandingsSeasonSelected);
+            window.removeEventListener("popstate", readSeasonIdFromUrl);
+        };
+    }, []);
+
     const loadSeason = useCallback(async () => {
+        if (seasonIdFromUrl === undefined) return;
+        
         try {
             if (seasonIdFromUrl) {
                 const seasonsRes = await fetch("/api/seasons?with_points=true", {
