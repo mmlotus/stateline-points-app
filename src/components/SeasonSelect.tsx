@@ -2,7 +2,7 @@
 
 import { Season } from "@/types";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "@/styles/CustomSelect.module.css";
 import { ChevronDown } from "lucide-react";
@@ -28,10 +28,10 @@ export default function SeasonSelect({
     const isStandingsPage = pathname === "/standings";
     const isSeasonPage = pathname === "/season";
     const showSeasonSelect = isSeasonPage || isStandingsPage;
-    
+
     const isAdmin = status === "authenticated" && session?.user?.role === "admin";
 
-    async function loadData() {
+    const loadData = useCallback(async () => {
         try {
             const seasonsUrl = isStandingsPage
                 ? "/api/seasons?with_points=true"
@@ -54,13 +54,13 @@ export default function SeasonSelect({
         } catch {
             toast.error("Failed to load seasons");
         }
-    }
+    }, [isStandingsPage, searchParams]);
 
     useEffect(() => {
         if (!showSeasonSelect) return;
 
         loadData();
-    }, [showSeasonSelect, isStandingsPage, searchParams]);
+    }, [loadData, showSeasonSelect]);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {

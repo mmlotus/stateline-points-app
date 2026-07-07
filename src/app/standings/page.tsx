@@ -19,7 +19,7 @@ export default function StandingsPage() {
     const seasonIdFromUrl = searchParams.get("season_id");
     const dropdownRef = useRef<HTMLDivElement>(null);
 
-    const { data: session, status } = useSession();
+    const { status } = useSession();
 
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
