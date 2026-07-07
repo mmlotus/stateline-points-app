@@ -1,13 +1,32 @@
 import { NextResponse } from "next/server";
 import sql from "@/lib/db";
 
-export async function GET() {
+export async function GET(req: Request) {
     try {
-        const seasons = await sql`
-            SELECT id, year, name, is_active, created_at
-            FROM seasons
-            ORDER BY year DESC, created_at DESC
-        `;
+        const url = new URL(req.url);
+        const withPoints = url.searchParams.get("with_points") === "true";
+
+        const seasons = withPoints
+            ? await sql`
+                SELECT DISTINCT
+                    s.id, s.year, s.name, s.is_active, s.created_at
+                FROM seasons s
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM season_championship_standings scs
+                    WHERE scs.season_id = s.id
+                        AND (
+                            scs.total_points > 0
+                            OR scs.events_count > 0
+                        )
+                )
+                ORDER BY s.year DESC, s.created_at DESC
+            `
+            : await sql`
+                SELECT id, year, name, is_active, created_at
+                FROM seasons
+                ORDER BY year DESC, created_at DESC
+            `;
 
         return NextResponse.json(seasons);
     } catch (err) {

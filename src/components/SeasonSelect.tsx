@@ -1,11 +1,12 @@
 "use client";
 
 import { Season } from "@/types";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import styles from "@/styles/CustomSelect.module.css";
 import { ChevronDown } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function SeasonSelect({
     newSeasonHref = "/season/new"
@@ -14,17 +15,30 @@ export default function SeasonSelect({
 }) {
     const router = useRouter();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const { data: session, status } = useSession();
 
     const [seasons, setSeasons] = useState<Season[]>([]);
     const [activeSeasonId, setActiveSeasonId] = useState<string | null>(null);
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const isStandingsPage = pathname === "/standings";
+    const isSeasonPage = pathname === "/season";
+    const showSeasonSelect = isSeasonPage || isStandingsPage;
+    
+    const isAdmin = status === "authenticated" && session?.user?.role === "admin";
+
     async function loadData() {
         try {
+            const seasonsUrl = isStandingsPage
+                ? "/api/seasons?with_points=true"
+                : "/api/seasons";
+
             const [allRes, activeRes] = await Promise.all([
-                fetch("/api/seasons", { cache: "no-store" }),
+                fetch(seasonsUrl, { cache: "no-store" }),
                 fetch("/api/seasons/active", { cache: "no-store" }),
             ]);
 
@@ -33,16 +47,20 @@ export default function SeasonSelect({
             const all = (await allRes.json()) as Season[];
             const active = (await activeRes.json()) as Season | null;
 
+            const seasonIdFromUrl = searchParams.get("season_id");
+
             setSeasons(all);
-            setActiveSeasonId(active?.id ?? null);
+            setActiveSeasonId(seasonIdFromUrl || active?.id || all[0]?.id || null);
         } catch {
             toast.error("Failed to load seasons");
         }
     }
 
     useEffect(() => {
+        if (!showSeasonSelect) return;
+
         loadData();
-    }, []);
+    }, [showSeasonSelect, isStandingsPage, searchParams]);
 
     useEffect(() => {
         function handleClickOutside(e: MouseEvent) {
@@ -83,10 +101,19 @@ export default function SeasonSelect({
         }
     }
 
-    const showSeasonSelect = pathname === "/season" || pathname === "/standings";
+    function seasonSelect(seasonId: string) {
+        if (isStandingsPage) {
+            setActiveSeasonId(seasonId);
+            setOpen(false);
+            router.push(`/standings?season_id=${seasonId}`);
+            return;
+        }
+
+        activateSeason(seasonId);
+    }
 
     if (!showSeasonSelect) return null;
-    
+
     const activeSeasonName = seasons.find((s) => s.id === activeSeasonId)?.name || "Select Season";
 
     return (
@@ -108,18 +135,20 @@ export default function SeasonSelect({
                             key={s.id}
                             className={`${styles.customSelectItem} ${s.id === activeSeasonId ? styles.activeItem : ""
                                 }`}
-                            onClick={() => activateSeason(s.id)}
+                            onClick={() => seasonSelect(s.id)}
                         >
                             {s.name}
                         </div>
                     ))}
 
-                    <div
-                        className={`${styles.customSelectItem} ${styles.createItem}`}
-                        onClick={() => router.push(newSeasonHref)}
-                    >
-                        + Create New Season
-                    </div>
+                    {isAdmin && (
+                        <div
+                            className={`${styles.customSelectItem} ${styles.createItem}`}
+                            onClick={() => router.push(newSeasonHref)}
+                        >
+                            + Create New Season
+                        </div>
+                    )}
                 </div>
             )}
         </div>

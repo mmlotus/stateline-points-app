@@ -10,17 +10,29 @@ export async function proxy(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     //Public exceptions
-    if (
-        pathname.startsWith("/_next") ||
-        pathname.startsWith("/api/auth") ||
-        pathname.startsWith("/public") ||
-        pathname === "/" ||
-        pathname === "/login" ||
-        pathname === "/privacy" ||
-        pathname === "/terms" ||
-        pathname.startsWith("/standings") ||
-        /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf)$/i.test(pathname)
-    ) {
+    function isPublicPath(pathname: string) {
+        const isPublicStandingsApi =
+            pathname === "/api/seasons" ||
+            pathname === "/api/seasons/active" ||
+            pathname === "/api/classes" ||
+            pathname === "/api/events/last-date" ||
+            /^\/api\/seasons\/[^/]+\/standings$/.test(pathname);
+
+        return (
+            pathname.startsWith("/_next") ||
+            pathname.startsWith("/api/auth") ||
+            pathname.startsWith("/public") ||
+            pathname === "/" ||
+            pathname === "/login" ||
+            pathname === "/privacy" ||
+            pathname === "/terms" ||
+            pathname.startsWith("/standings") ||
+            isPublicStandingsApi ||
+            /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf)$/i.test(pathname)
+        );
+    }
+
+    if (isPublicPath(pathname)) {
         return NextResponse.next();
     }
 

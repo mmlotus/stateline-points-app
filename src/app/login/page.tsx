@@ -4,15 +4,16 @@ import { Suspense, useMemo, useState } from "react";
 import styles from "../../styles/Global.module.css";
 import { signIn, useSession } from "next-auth/react";
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 const DOMAIN_OPTIONS = [
     "gmail.com",
-    "raceidaho.com",
     "outlook.com",
     "hotmail.com",
 ];
 
 function SignInContent() {
+    const router = useRouter();
     const { status } = useSession();
 
     const [identifier, setIdentifier] = useState("");
@@ -58,60 +59,71 @@ function SignInContent() {
     const showDomainDropdown = !identifier.includes("@");
 
     return (
-        <div className={styles.centeredPanel}>
-            <h1 className={styles.heading}>SIGN IN</h1>
+        <>
+            <button
+                type="button"
+                className={`${styles.button} ${styles.centeredPanel}`}
+                style={{ fontSize: "24px" }}
+                onClick={() => router.push("/standings")}
+            >
+                CHAMPIONSHIP STANDINGS
+            </button>
 
-            <form className={styles.form} onSubmit={handleLogin}>
-                {/* Username/email + domain dropdown row */}
-                <div className={styles.emailRow}>
+            <div className={styles.centeredPanel}>
+                <h1 className={styles.heading}>SIGN IN</h1>
+
+                <form className={styles.form} onSubmit={handleLogin}>
+                    {/* Username/email + domain dropdown row */}
+                    <div className={styles.emailRow}>
+                        <input
+                            type="text"
+                            placeholder="email"
+                            value={identifier}
+                            onChange={(e) => setIdentifier(e.target.value)}
+                            className={`${styles.input} ${styles.usernameInput}`}
+                            autoComplete="username"
+                        />
+
+                        {showDomainDropdown && (
+                            <select
+                                value={domain}
+                                onChange={(e) => setDomain(e.target.value)}
+                                className={`${styles.input} ${styles.domainSelect}`}
+                            >
+                                {DOMAIN_OPTIONS.map((d) => (
+                                    <option key={d} value={d}>
+                                        @{d}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+
                     <input
-                        type="text"
-                        placeholder="email"
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        className={`${styles.input} ${styles.usernameInput}`}
-                        autoComplete="username"
+                        type="password"
+                        placeholder="*********"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={styles.input}
+                        style={{ marginTop: "10px" }}
+                        autoComplete="current-password"
                     />
 
-                    {showDomainDropdown && (
-                        <select
-                            value={domain}
-                            onChange={(e) => setDomain(e.target.value)}
-                            className={`${styles.input} ${styles.domainSelect}`}
-                        >
-                            {DOMAIN_OPTIONS.map((d) => (
-                                <option key={d} value={d}>
-                                    @{d}
-                                </option>
-                            ))}
-                        </select>
+                    <button
+                        type="submit"
+                        className={styles.button}
+                        style={{ marginTop: "12px" }}
+                        disabled={loading || !email || !password}
+                    >
+                        {loading ? "Turning left..." : "SEND IT"}
+                    </button>
+
+                    {errorMsg && (
+                        <div className={styles.errorText}>{errorMsg}</div>
                     )}
-                </div>
-
-                <input
-                    type="password"
-                    placeholder="*********"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={styles.input}
-                    style={{ marginTop: "10px" }}
-                    autoComplete="current-password"
-                />
-
-                <button
-                    type="submit"
-                    className={styles.button}
-                    style={{ marginTop: "12px" }}
-                    disabled={loading || !email || !password}
-                >
-                    {loading ? "Turning left..." : "SEND IT"}
-                </button>
-
-                {errorMsg && (
-                    <div className={styles.errorText}>{errorMsg}</div>
-                )}
-            </form>
-        </div>
+                </form>
+            </div>
+        </>
     );
 }
 

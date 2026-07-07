@@ -4,17 +4,22 @@ import styles from "@/styles/Global.module.css";
 import custStyles from "@/styles/Customers.module.css";
 import selectStyles from "@/styles/CustomSelect.module.css";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Class, Season, StandingRow } from "@/types";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { formatDate, todayDate } from "@/components/Formatter";
 import { ChevronDown, History } from "lucide-react";
 import { getClassDisplayName } from "@/lib/getClassName";
+import { useSession } from "next-auth/react";
 
 export default function StandingsPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const seasonIdFromUrl = searchParams.get("season_id");
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const { data: session, status } = useSession();
 
     const [loading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
@@ -35,6 +40,8 @@ export default function StandingsPage() {
     const [dateFilter, setDateFilter] = useState("");
     const [applyFilterDate, setApplyFilterDate] = useState("");
     const [lastEventDateOfSeason, setLastEventDateOfSeason] = useState("");
+
+    const isLoggedIn = status === "authenticated";
 
     const classStandings = useMemo(() => {
         if (!selectedClassId) return [];
@@ -78,12 +85,40 @@ export default function StandingsPage() {
 
     const loadSeason = useCallback(async () => {
         try {
+            if (seasonIdFromUrl) {
+                const seasonsRes = await fetch("/api/seasons?with_points=true", {
+                    cache: "no-store",
+                });
+
+                const seasonsJson = await seasonsRes.json();
+
+                if (!seasonsRes.ok) {
+                    toast.error(seasonsJson?.error || "Failed to load seasons.");
+                    setLoading(false);
+                    return;
+                }
+
+                const selectedSeason = (seasonsJson as Season[]).find(
+                    (s) => s.id === seasonIdFromUrl
+                );
+
+                if (!selectedSeason) {
+                    toast.error("Selected season was not found.");
+                    setLoading(false);
+                    return;
+                }
+
+                setSeason(selectedSeason);
+                setSelectedSeasonId(selectedSeason.id);
+                return;
+            }
+
             const sRes = await fetch("/api/seasons/active", { cache: "no-store" });
             const sJson = await sRes.json();
 
             if (!sRes.ok) {
-                toast.error(sJson?.error || "Failed to load active season.");
-                router.back();
+                toast.error(sJson?.error || "Failed to load season.");
+                setLoading(false);
                 return;
             }
 
@@ -91,10 +126,10 @@ export default function StandingsPage() {
             setSelectedSeasonId(sJson.id);
         } catch (error) {
             console.error(error);
-            toast.error("Failed to load active season.");
-            router.back();
+            toast.error("Failed to load season.");
+            setLoading(false);
         }
-    }, [router]);
+    }, [seasonIdFromUrl]);
 
     useEffect(() => {
         async function loadPage() {
@@ -203,16 +238,18 @@ export default function StandingsPage() {
             <div className={custStyles.header}>
                 <h1 className={styles.heading}>{`Championship Standings for ${season?.year}`}</h1>
 
-                <div className={custStyles.tools}>
-                    <button
-                        className={styles.buttonSecondary}
-                        onClick={() => {
-                            router.push("/season");
-                        }}
-                    >
-                        Reverse
-                    </button>
-                </div>
+                {isLoggedIn && (
+                    <div className={custStyles.tools}>
+                        <button
+                            className={styles.buttonSecondary}
+                            onClick={() => {
+                                router.push("/season");
+                            }}
+                        >
+                            Reverse
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className={styles.keyPanel}>
@@ -295,6 +332,8 @@ export default function StandingsPage() {
                         className={styles.button}
                         type="button"
                         onClick={() => {
+                            if (dateFilter === applyFilterDate) return;
+
                             setLoading(true);
                             setApplyFilterDate(dateFilter);
                         }}
@@ -306,10 +345,13 @@ export default function StandingsPage() {
                         className={styles.link}
                         type="button"
                         onClick={() => {
-                            setLoading(true);
                             setDateFilter("");
-                            setApplyFilterDate("");
                             setSearchTerm("");
+
+                            if (applyFilterDate) {
+                                setLoading(true);
+                                setApplyFilterDate("");
+                            }
                         }}
                     >
                         Clear filters
