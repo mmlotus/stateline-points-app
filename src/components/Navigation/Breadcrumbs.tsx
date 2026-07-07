@@ -15,7 +15,12 @@ export default function Breadcrumbs() {
     const pathname = usePathname();
     const [labelMap, setLabelMap] = useState<Record<string, string>>({});
 
-    const segments = pathname.split("/").filter(Boolean);
+    const rawSegments = pathname.split("/").filter(Boolean);
+
+    const segments =
+        rawSegments[0] === "driver-history"
+            ? rawSegments.slice(0, 1)
+            : rawSegments;
 
     useEffect(() => {
         const loadLabels = async () => {

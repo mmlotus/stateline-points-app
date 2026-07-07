@@ -6,6 +6,7 @@ export const breadcrumbMap: Record<string, string> = {
     events: "Events",
     results: "Results",
     drivers: "Drivers",
+    "driver-history": "Driver History",
     standings: "Championship",
     schemes: "Points/Pay",
     tires: "Tires",

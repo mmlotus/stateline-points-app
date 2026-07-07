@@ -16,6 +16,7 @@ export async function proxy(req: NextRequest) {
             pathname === "/api/seasons/active" ||
             pathname === "/api/classes" ||
             pathname === "/api/events/last-date" ||
+            pathname === "/api/driver-history" ||
             /^\/api\/seasons\/[^/]+\/standings$/.test(pathname);
 
         return (
@@ -27,6 +28,7 @@ export async function proxy(req: NextRequest) {
             pathname === "/privacy" ||
             pathname === "/terms" ||
             pathname.startsWith("/standings") ||
+            pathname.startsWith("/driver-history") ||
             isPublicStandingsApi ||
             /\.(?:png|jpg|jpeg|svg|gif|webp|ico|css|js|woff2?|ttf)$/i.test(pathname)
         );

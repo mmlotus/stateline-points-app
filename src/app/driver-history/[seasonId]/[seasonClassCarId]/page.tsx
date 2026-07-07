@@ -11,10 +11,14 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import Pagination from "@/components/Pagination";
 import { formatDate } from "@/components/Formatter";
 import { ArrowRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function DriverHistoryPage() {
     const router = useRouter();
     const params = useParams<{ seasonId: string; seasonClassCarId: string }>();
+
+    const { status } = useSession();
+    const isLoggedIn = status === "authenticated";
 
     const seasonId = params.seasonId;
     const seasonClassCarId = params.seasonClassCarId;
@@ -109,7 +113,7 @@ export default function DriverHistoryPage() {
                                 <th style={{ textAlign: "center" }}>Races</th>
                                 <th style={{ textAlign: "center" }}><SortHeader label="Points" sortKey="total_points" /></th>
                                 <th style={{ textAlign: "center" }}><SortHeader label="Pay" sortKey="total_pay" /></th>
-                                <th style={{ textAlign: "center" }}><SortHeader label="Status" sortKey="event_status"/></th>
+                                <th style={{ textAlign: "center" }}><SortHeader label="Status" sortKey="event_status" /></th>
                                 <th style={{ textAlign: "center" }}></th>
                             </tr>
                         </thead>
@@ -138,16 +142,18 @@ export default function DriverHistoryPage() {
                                         <td style={{ textAlign: "center" }}>${event.total_pay}</td>
                                         <td style={{ textAlign: "center" }}>{event.event_status}</td>
                                         <td className={custStyles.right} style={{ width: 40 }}>
-                                            <button
-                                                className={styles.iconButton}
-                                                onClick={() =>
-                                                    router.push(`/season/${seasonId}/events/${event.event_id}/points-pay?class_id=${history?.summary?.class_id}`)
-                                                }
-                                                aria-label="Go to event"
-                                                title="Go to event"
-                                            >
-                                                <ArrowRight size={16} />
-                                            </button>
+                                            {isLoggedIn && (
+                                                <button
+                                                    className={styles.iconButton}
+                                                    onClick={() =>
+                                                        router.push(`/season/${seasonId}/events/${event.event_id}/points-pay?class_id=${history?.summary?.class_id}`)
+                                                    }
+                                                    aria-label="Go to event"
+                                                    title="Go to event"
+                                                >
+                                                    <ArrowRight size={16} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
