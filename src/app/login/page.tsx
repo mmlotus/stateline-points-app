@@ -62,12 +62,13 @@ function SignInContent() {
         <>
             <button
                 type="button"
-                className={`${styles.button} ${styles.centeredPanel}`}
+                className={`${styles.buttonGold} ${styles.centeredPanel}`}
                 style={{ fontSize: "24px" }}
                 onClick={() => router.push("/standings")}
             >
                 CHAMPIONSHIP STANDINGS
             </button>
+            <p style={{ textAlign: "center" }}>Click here to see your points!</p>
 
             <div className={styles.centeredPanel}>
                 <h1 className={styles.heading}>SIGN IN</h1>
