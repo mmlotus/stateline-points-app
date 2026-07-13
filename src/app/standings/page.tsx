@@ -83,6 +83,10 @@ export default function StandingsPage() {
         }));
     }, [classStandings]);
 
+    const leaderPoints = rankedStandings.length
+        ? Number(rankedStandings[0].total_points)
+        : 0;
+
     const filteredStandings = useMemo(() => {
         const term = searchTerm.trim().toLowerCase();
 
@@ -487,15 +491,23 @@ export default function StandingsPage() {
                                             ) : null}
                                         </td>
                                         <td style={{ textAlign: "center" }}>
-                                            <span className={custStyles.pointsWithTie}>
-                                                {row.total_points}
+                                            <div>
+                                                <span className={custStyles.pointsWithTie}>
+                                                    {row.total_points}
 
-                                                {isTied && (
-                                                    <span className={custStyles.tieBadge}>
-                                                        TIE
-                                                    </span>
-                                                )}
-                                            </span>
+                                                    {isTied && (
+                                                        <span className={custStyles.tieBadge}>
+                                                            TIE
+                                                        </span>
+                                                    )}
+                                                </span>
+                                            </div>
+
+                                            {leaderPoints - Number(row.total_points) > 0 && (
+                                                <div className={custStyles.subtle}>
+                                                    {(Number(row.total_points) - leaderPoints).toFixed(2)}
+                                                </div>
+                                            )}
                                         </td>
                                         <td style={{ textAlign: "center" }}>${row.total_pay}</td>
                                         <td className={custStyles.right} style={{ width: 40 }}>
