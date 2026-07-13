@@ -154,3 +154,27 @@
     padding: 4px 10px;
     border-radius: 6px;
 }
+
+.tiedStandingRow {
+    background-color: rgba(255, 215, 0, 0.08);
+}
+
+.pointsWithTie {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.tieBadge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.12rem 0.35rem;
+    border-radius: 999px;
+    background-color: rgba(255, 193, 7, 0.18);
+    color: #806000;
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.04em;
+}

@@ -13,6 +13,23 @@ import { ChevronDown, History } from "lucide-react";
 import { getClassDisplayName } from "@/lib/getClassName";
 import { useSession } from "next-auth/react";
 
+const allowedClassNames = [
+    "4-Cylinder Figure 8", //1
+    "BTP Boats", //2
+    "Bandoleros", //3
+    "Bump To Pass", //4
+    "Early Stocks", //5
+    "Fever 4", //6
+    "Freedom Mods", //7
+    "Hobby Stocks", //8
+    "IWS Sprint Series", //9
+    "Legends", //10
+    "Nostalgia Mods", //11 
+    "Pro Late Models", //12
+    "Roadrunners", //13
+    "V6 Claimers", //14
+];
+
 export default function StandingsPage() {
     const router = useRouter();
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -82,6 +99,17 @@ export default function StandingsPage() {
         });
     }, [rankedStandings, selectedClassId, searchTerm]);
 
+    const tiedPointTotals = useMemo(() => {
+        const counts = new Map<string, number>();
+
+        rankedStandings.forEach((row) => {
+            const points = Number(row.total_points).toFixed(2);
+            counts.set(points, (counts.get(points) ?? 0) + 1);
+        });
+
+        return counts;
+    }, [rankedStandings]);
+
     useEffect(() => {
         function readSeasonIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
@@ -106,7 +134,7 @@ export default function StandingsPage() {
 
     const loadSeason = useCallback(async () => {
         if (seasonIdFromUrl === undefined) return;
-        
+
         try {
             if (seasonIdFromUrl) {
                 const seasonsRes = await fetch("/api/seasons?with_points=true", {
@@ -197,8 +225,16 @@ export default function StandingsPage() {
                 setStandings(standingsJson.standings || []);
                 setLastEventDateOfSeason(lastEventJson.last_event_date || "");
 
-                if ((classesJson || []).length > 0) {
-                    setSelectedClassId((prev) => prev || classesJson[0].id);
+                const firstAllowedClass = (classesJson || []).find((cls: Class) => {
+                    const displayName = getClassDisplayName(cls).toLowerCase();
+
+                    return allowedClassNames.some((allowedName) =>
+                        displayName.includes(allowedName.toLowerCase())
+                    );
+                });
+
+                if (firstAllowedClass) {
+                    setSelectedClassId((prev) => prev || firstAllowedClass.id);
                 }
             } catch (error) {
                 console.error(error);
@@ -254,6 +290,18 @@ export default function StandingsPage() {
         return displayDate;
     }
 
+    const visibleClasses = useMemo(
+        () =>
+            allClasses.filter((cls) => {
+                const displayName = getClassDisplayName(cls).toLowerCase();
+
+                return allowedClassNames.some((allowedName) =>
+                    displayName.includes(allowedName.toLowerCase())
+                );
+            }),
+        [allClasses]
+    );
+
     if (loading) return <LoadingSpinner />;
 
     return (
@@ -291,7 +339,7 @@ export default function StandingsPage() {
 
                     {open && (
                         <div className={selectStyles.customSelectMenu} style={{ width: 250 }}>
-                            {allClasses.map((cls) => (
+                            {visibleClasses.map((cls) => (
                                 <div
                                     key={cls.id}
                                     className={`${selectStyles.customSelectItem} ${cls.id === selectedClassId ? selectStyles.activeItem : ""
@@ -424,32 +472,47 @@ export default function StandingsPage() {
                                 </td>
                             </tr>
                         ) : (
-                            filteredStandings.map((row) => (
-                                <tr key={row.season_class_car_id}>
-                                    <td style={{ textAlign: "center" }}>{row.rank}</td>
-                                    <td style={{ textAlign: "center" }}>{row.car_number}</td>
-                                    <td style={{ textAlign: "center" }}>
-                                        <div>{row.primary_driver_name}</div>
-                                        {row.co_driver_name ? (
-                                            <div className={custStyles.subtle}>{row.co_driver_name}</div>
-                                        ) : null}
-                                    </td>
-                                    <td style={{ textAlign: "center" }}>{row.total_points}</td>
-                                    <td style={{ textAlign: "center" }}>${row.total_pay}</td>
-                                    <td className={custStyles.right} style={{ width: 40 }}>
-                                        <button
-                                            className={styles.iconButton}
-                                            onClick={() =>
-                                                router.push(`/driver-history/${selectedSeasonId}/${row.season_class_car_id}`)
-                                            }
-                                            aria-label="See driver history"
-                                            title="See driver's events"
-                                        >
-                                            <History size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
+                            filteredStandings.map((row) => {
+                                const points = Number(row.total_points).toFixed(2);
+                                const isTied = (tiedPointTotals.get(points) ?? 0) > 1;
+
+                                return (
+                                    <tr key={row.season_class_car_id} className={isTied ? custStyles.tiedStandingRow : undefined}>
+                                        <td style={{ textAlign: "center" }}>{row.rank}</td>
+                                        <td style={{ textAlign: "center" }}>{row.car_number}</td>
+                                        <td style={{ textAlign: "center" }}>
+                                            <div>{row.primary_driver_name}</div>
+                                            {row.co_driver_name ? (
+                                                <div className={custStyles.subtle}>{row.co_driver_name}</div>
+                                            ) : null}
+                                        </td>
+                                        <td style={{ textAlign: "center" }}>
+                                            <span className={custStyles.pointsWithTie}>
+                                                {row.total_points}
+
+                                                {isTied && (
+                                                    <span className={custStyles.tieBadge}>
+                                                        TIE
+                                                    </span>
+                                                )}
+                                            </span>
+                                        </td>
+                                        <td style={{ textAlign: "center" }}>${row.total_pay}</td>
+                                        <td className={custStyles.right} style={{ width: 40 }}>
+                                            <button
+                                                className={styles.iconButton}
+                                                onClick={() =>
+                                                    router.push(`/driver-history/${selectedSeasonId}/${row.season_class_car_id}`)
+                                                }
+                                                aria-label="See driver history"
+                                                title="See driver's events"
+                                            >
+                                                <History size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })
                         )}
                     </tbody>
                 </table>
