@@ -330,7 +330,7 @@ export default function StandingsPage() {
             <div className={styles.keyPanel}>
                 <h2 className={styles.subheading}>Classes</h2>
 
-                <div className={selectStyles.customSelect} ref={dropdownRef}>
+                <div className={`${selectStyles.customSelect} ${selectStyles.standingsSelect}`} ref={dropdownRef}>
                     <button
                         type="button"
                         className={selectStyles.customSelectTrigger2}
@@ -342,7 +342,7 @@ export default function StandingsPage() {
                     </button>
 
                     {open && (
-                        <div className={selectStyles.customSelectMenu} style={{ width: 250 }}>
+                        <div className={selectStyles.customSelectMenu}>
                             {visibleClasses.map((cls) => (
                                 <div
                                     key={cls.id}

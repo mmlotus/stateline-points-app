@@ -69,3 +69,25 @@
 .chevronOpen {
   transform: rotate(180deg);
 }
+
+.standingsSelect {
+  min-width: 360px;
+}
+
+.standingsSelect .customSelectTrigger2 {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+}
+
+.standingsSelect .customSelectMenu {
+  left: 0;
+  right: auto;
+  width: 100%;
+  max-height: 420px;
+}
+
+.standingsSelect .customSelectItem {
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+}
