@@ -17,6 +17,7 @@ export async function proxy(req: NextRequest) {
             pathname === "/api/classes" ||
             pathname === "/api/events/last-date" ||
             pathname === "/api/driver-history" ||
+            pathname === "/api/shootout" ||
             /^\/api\/seasons\/[^/]+\/standings$/.test(pathname);
 
         return (
@@ -27,6 +28,7 @@ export async function proxy(req: NextRequest) {
             pathname === "/login" ||
             pathname === "/privacy" ||
             pathname === "/terms" ||
+            pathname === "/shootout" ||
             pathname.startsWith("/standings") ||
             pathname.startsWith("/driver-history") ||
             isPublicStandingsApi ||

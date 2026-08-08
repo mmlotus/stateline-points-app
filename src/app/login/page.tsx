@@ -70,6 +70,16 @@ function SignInContent() {
             </button>
             <p style={{ textAlign: "center" }}>Click here to see your points!</p>
 
+            <button
+                type="button"
+                className={`${styles.buttonGold} ${styles.centeredPanel}`}
+                style={{ fontSize: "24px" }}
+                onClick={() => router.push("/shootout")}
+            >
+                BANDO/LEGEND SHOOTOUT
+            </button>
+            <p style={{ textAlign: "center" }}>Click here to see the 2026 Bando/Legend Shootout!</p>
+
             <div className={styles.centeredPanel}>
                 <h1 className={styles.heading}>SIGN IN</h1>
 

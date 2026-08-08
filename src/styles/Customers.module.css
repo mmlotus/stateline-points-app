@@ -178,3 +178,33 @@
     line-height: 1;
     letter-spacing: 0.04em;
 }
+
+.shootoutGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+    margin-top: 12px;
+}
+
+.shootoutEditorGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+    margin-top: 12px;
+}
+
+.shootoutEditorGrid .table td {
+    padding: 8px;
+}
+
+.shootoutEditorGrid .table input {
+    min-width: 0;
+}
+
+@media (max-width: 1000px) {
+    .shootoutGrid {
+        grid-template-columns: 1fr;
+    }
+}
