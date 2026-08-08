@@ -234,7 +234,8 @@
     .shootoutGrid .table tbody td {
         padding: 8px 3px;
         white-space: normal;
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        word-break: normal;
     }
 
     .shootoutGrid .table th:nth-child(1),
@@ -245,6 +246,12 @@
     .shootoutGrid .table th:nth-child(2),
     .shootoutGrid .table td:nth-child(2) {
         width: 10%;
+    }
+
+    .shootoutGrid .table td:nth-child(3) {
+        white-space: normal;
+        overflow-wrap: normal;
+        word-break: keep-all;
     }
 
     .shootoutGrid .table th:nth-child(3),
