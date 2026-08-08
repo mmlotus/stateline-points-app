@@ -126,7 +126,7 @@ function ShootoutTable({
                 <thead>
                     <tr>
                         <th style={{ textAlign: "center" }}>
-                            Position
+                            Pos
                         </th>
 
                         <th style={{ textAlign: "center" }}>
