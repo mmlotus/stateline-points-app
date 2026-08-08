@@ -112,6 +112,15 @@ function ShootoutTable({
     return (
         <div className={custStyles.tableWrap}>
             <table className={custStyles.table}>
+                <colgroup>
+                    <col className={custStyles.shootoutPosCol} />
+                    <col className={custStyles.shootoutCarCol} />
+                    <col className={custStyles.shootoutDriverCol} />
+                    <col className={custStyles.shootoutTotalCol} />
+                    <col className={custStyles.shootoutDayCol} />
+                    <col className={custStyles.shootoutDayCol} />
+                    <col className={custStyles.shootoutDayCol} />
+                </colgroup>
                 <thead>
                     <tr>
                         <th
