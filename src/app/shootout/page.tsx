@@ -300,6 +300,8 @@ export default function ShootoutPage() {
                     rows={legends}
                 />
             </div>
+
+            <div style={{ marginBottom: "50px" }} />
         </div>
     );
 }
