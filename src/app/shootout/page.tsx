@@ -21,6 +21,15 @@ type ShootoutApiRow = {
     co_driver_drove: boolean;
 
     total_points: number | string;
+
+    day_pay: number | string;
+    base_shootout_pay: number | string;
+
+    overall_group: "BANDO_A" | "BANDO_B" | "LEGENDS" | null;
+    overall_position: number | string | null;
+
+    bonus_pay: number | string;
+    overall_pay: number | string;
 };
 
 type ShootoutRow = {
@@ -31,6 +40,11 @@ type ShootoutRow = {
     day2: number;
     day3: number;
     total: number;
+
+    overallGroup: "BANDO_A" | "BANDO_B" | "LEGENDS" | null;
+    overallPosition: number | null;
+    bonusPay: number;
+    overallPay: number;
 };
 
 type ShootoutResponse = {
@@ -64,6 +78,14 @@ function buildStandings(
                 day2: 0,
                 day3: 0,
                 total: 0,
+
+                overallGroup: row.overall_group,
+                overallPosition: row.overall_position
+                    ? Number(row.overall_position)
+                    : null,
+
+                bonusPay: Number(row.bonus_pay) || 0,
+                overallPay: Number(row.overall_pay) || 0,
             });
         }
 
@@ -116,6 +138,7 @@ function ShootoutTable({
                     <col className={custStyles.shootoutPosCol} />
                     <col className={custStyles.shootoutCarCol} />
                     <col className={custStyles.shootoutDriverCol} />
+                    <col className={custStyles.shootoutPayCol} />
                     <col className={custStyles.shootoutTotalCol} />
                     <col className={custStyles.shootoutDayCol} />
                     <col className={custStyles.shootoutDayCol} />
@@ -124,7 +147,7 @@ function ShootoutTable({
                 <thead>
                     <tr>
                         <th
-                            colSpan={7}
+                            colSpan={8}
                             className={custStyles.favoritesHeader}
                         >
                             {title}
@@ -144,6 +167,10 @@ function ShootoutTable({
 
                         <th style={{ textAlign: "center" }}>
                             Driver
+                        </th>
+
+                        <th style={{ textAlign: "center" }}>
+                            Pay
                         </th>
 
                         <th style={{ textAlign: "center" }}>
@@ -168,7 +195,7 @@ function ShootoutTable({
                     {!rows.length ? (
                         <tr>
                             <td
-                                colSpan={7}
+                                colSpan={8}
                                 className={custStyles.empty}
                             >
                                 No Shootout points recorded yet.
@@ -176,7 +203,18 @@ function ShootoutTable({
                         </tr>
                     ) : (
                         rows.map((row, index) => (
-                            <tr key={row.season_class_car_id}>
+                            <tr
+                                key={row.season_class_car_id}
+                                className={
+                                    row.overallPosition === 1
+                                        ? custStyles.shootoutFirstRow
+                                        : row.overallPosition === 2
+                                            ? custStyles.shootoutSecondRow
+                                            : row.overallPosition === 3
+                                                ? custStyles.shootoutThirdRow
+                                                : undefined
+                                }
+                            >
                                 <td style={{ textAlign: "center" }}>
                                     {index + 1}
                                 </td>
@@ -189,14 +227,31 @@ function ShootoutTable({
                                     <span className={custStyles.name}>
                                         {row.driver_name}
                                     </span>
+
+                                    {row.overallPosition && row.overallPosition <= 3 && (
+                                        <div className={custStyles.shootoutPodium}>
+                                            {row.overallPosition === 1
+                                                ? "🏆 1st"
+                                                : row.overallPosition === 2
+                                                    ? "🥈 2nd"
+                                                    : "🥉 3rd"
+                                            }
+
+                                            {row.overallGroup === "BANDO_A"
+                                                ? " A Main"
+                                                : row.overallGroup === "BANDO_B"
+                                                    ? " B Main"
+                                                    : " Overall"
+                                            }
+                                        </div>
+                                    )}
                                 </td>
 
-                                <td
-                                    style={{
-                                        textAlign: "center",
-                                        fontWeight: 700,
-                                    }}
-                                >
+                                <td style={{ textAlign: "center", fontWeight: 700 }}>
+                                    ${row.overallPay.toLocaleString()}
+                                </td>
+
+                                <td style={{ textAlign: "center", fontWeight: 700 }}>
                                     {row.total}
                                 </td>
 

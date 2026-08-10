@@ -203,6 +203,26 @@
     min-width: 0;
 }
 
+.shootoutPodium {
+    margin-top: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.shootoutFirstRow {
+    background: #cf920e35;
+}
+
+.shootoutSecondRow {
+    background: #a09f9f35;
+}
+
+.shootoutThirdRow {
+    background: #86653335;
+}
+
 @media (max-width: 1000px) {
     .shootoutGrid {
         grid-template-columns: 1fr;
@@ -226,23 +246,27 @@
     }
 
     .shootoutPosCol {
-        width: 7%;
+        width: 6%;
     }
 
     .shootoutCarCol {
-        width: 9%;
+        width: 8%;
     }
 
     .shootoutDriverCol {
-        width: 34%;
+        width: 26%;
+    }
+
+    .shootoutPayCol {
+        width: 13%;
     }
 
     .shootoutTotalCol {
-        width: 11%;
+        width: 13%;
     }
 
     .shootoutDayCol {
-        width: 13%;
+        width: 11.33%;
     }
 
     .shootoutGrid .table thead th {

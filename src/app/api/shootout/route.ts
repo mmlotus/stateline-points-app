@@ -26,7 +26,13 @@ export async function GET() {
                 primary_driver_name,
                 co_driver_name,
                 co_driver_drove,
-                total_points
+                total_points,
+                day_pay,
+                base_shootout_pay,
+                overall_group,
+                overall_position,
+                bonus_pay,
+                overall_pay
             FROM shootout_frozen_standings
             ORDER BY
                 class_name ASC,
