@@ -84,6 +84,7 @@ export type StandingRow = {
     class_name: string;
     car_number: string;
     registration_car_number: string;
+    primary_driver_id: string;
     primary_driver_name: string;
     co_driver_name: string | null;
     total_points: number;

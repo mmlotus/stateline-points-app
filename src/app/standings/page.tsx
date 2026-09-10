@@ -12,27 +12,32 @@ import { formatDate, todayDate } from "@/components/Formatter";
 import { ChevronDown, History } from "lucide-react";
 import { getClassDisplayName } from "@/lib/getClassName";
 import { useSession } from "next-auth/react";
+import { toJpeg } from "html-to-image";
 
 const allowedClassNames = [
     "4-Cylinder Figure 8", //1
     "BTP Boats", //2
     "Bandoleros", //3
     "Bump To Pass", //4
-    "Early Stocks", //5
-    "Fever 4", //6
-    "Freedom Mods", //7
-    "Hobby Stocks", //8
-    "IWS Sprint Series", //9
-    "Legends", //10
-    "Nostalgia Mods", //11 
-    "Pro Late Models", //12
-    "Roadrunners", //13
-    "V6 Claimers", //14
+    "Bump To Pass (Combined)", //5
+    "Early Stocks", //6
+    "Fever 4", //7
+    "Freedom Mods", //8
+    "Hobby Stocks", //9
+    "IWS Sprint Series", //10
+    "Legends", //11
+    "Nostalgia Mods", //12
+    "Pro Late Models", //13
+    "Roadrunners", //14
+    "V6 Claimers", //15
 ];
+
+const COMBINED_BTP_NAME = "Bump to Pass (Combined)";
 
 export default function StandingsPage() {
     const router = useRouter();
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const standingsExportRef = useRef<HTMLDivElement>(null);
 
     const { status } = useSession();
 
@@ -47,7 +52,20 @@ export default function StandingsPage() {
     const [selectedClassId, setSelectedClassId] = useState("");
 
     const selectedClassObj = allClasses.find((c) => c.id === selectedClassId);
-    const selectedClass = selectedClassObj ? getClassDisplayName(selectedClassObj) : "Class";
+    const selectedClass =
+        selectedClassId === COMBINED_BTP_NAME
+            ? COMBINED_BTP_NAME
+            : selectedClassObj ? getClassDisplayName(selectedClassObj) : "Class";
+
+    const btpClassIds = useMemo(() => {
+        return allClasses
+            .filter((cls) => {
+                const name = cls.name.trim().toLowerCase();
+
+                return name === "bump to pass" || name === "btp boats";
+            })
+            .map((cls) => cls.id);
+    }, [allClasses]);
 
     const [standings, setStandings] = useState<StandingRow[]>([]);
 
@@ -62,8 +80,44 @@ export default function StandingsPage() {
     const classStandings = useMemo(() => {
         if (!selectedClassId) return [];
 
-        return standings.filter((row) => row.class_id === selectedClassId);
-    }, [standings, selectedClassId]);
+        if (selectedClassId !== COMBINED_BTP_NAME) {
+            return standings.filter((row) => row.class_id === selectedClassId);
+        }
+
+        const sourceRows = standings.filter((row) => btpClassIds.includes(row.class_id));
+
+        const grouped = new Map<string, StandingRow>();
+
+        sourceRows.forEach((row) => {
+            const key = row.primary_driver_id;
+
+            const existing = grouped.get(key);
+
+            if (!existing) {
+                grouped.set(key, {
+                    ...row,
+                    class_id: COMBINED_BTP_NAME,
+                    season_class_car_id: `combined-${row.primary_driver_id}`,
+                    total_points: Number(row.total_points ?? 0),
+                    total_pay: Number(row.total_pay ?? 0),
+                });
+
+                return;
+            }
+
+            grouped.set(key, {
+                ...existing,
+                total_points:
+                    Number(existing.total_points ?? 0) +
+                    Number(row.total_points ?? 0),
+                total_pay:
+                    Number(existing.total_pay ?? 0) +
+                    Number(row.total_pay ?? 0),
+            });
+        });
+
+        return Array.from(grouped.values());
+    }, [standings, selectedClassId, btpClassIds]);
 
     const rankedStandings = useMemo(() => {
         const sorted = [...classStandings].sort((a, b) => {
@@ -306,6 +360,54 @@ export default function StandingsPage() {
         [allClasses]
     );
 
+    async function saveStandingsAsJpeg() {
+        if (!standingsExportRef.current) return;
+
+        const historyColumns =
+            standingsExportRef.current.querySelectorAll<HTMLElement>(".historyColumn");
+
+        const exportInfoHeader =
+            standingsExportRef.current.querySelector<HTMLTableCellElement>(".exportInfoHeader");
+
+        try {
+            historyColumns.forEach((el) => {
+                el.style.display = "none";
+            });
+
+            if (exportInfoHeader) {
+                exportInfoHeader.colSpan = 1;
+            }
+
+            const dataUrl = await toJpeg(standingsExportRef.current, {
+                quality: 0.98,
+                pixelRatio: 3,
+                backgroundColor: "#ffffff",
+                cacheBust: true,
+            });
+
+            const link = document.createElement("a");
+
+            const safeClassName = selectedClass
+                .replace(/[^a-z0-9]+/gi, "-")
+                .replace(/^-|-$/g, "");
+
+            link.download = `${season?.year}-${safeClassName}-Standings.jpg`;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            console.error(err);
+            toast.error("Failed to save standings image.");
+        } finally {
+            historyColumns.forEach((el) => {
+                el.style.display = "";
+            });
+
+            if (exportInfoHeader) {
+                exportInfoHeader.colSpan = 2;
+            }
+        }
+    }
+
     if (loading) return <LoadingSpinner />;
 
     return (
@@ -343,6 +445,18 @@ export default function StandingsPage() {
 
                     {open && (
                         <div className={selectStyles.customSelectMenu}>
+                            <div className={`${selectStyles.customSelectItem} ${selectedClassId === COMBINED_BTP_NAME
+                                ? selectStyles.activeItem
+                                : ""
+                                }`}
+                                onClick={() => {
+                                    setSelectedClassId(COMBINED_BTP_NAME);
+                                    setOpen(false);
+                                }}
+                            >
+                                {COMBINED_BTP_NAME}
+                            </div>
+
                             {visibleClasses.map((cls) => (
                                 <div
                                     key={cls.id}
@@ -432,16 +546,25 @@ export default function StandingsPage() {
                         Clear filters
                     </button>
                 </div>
+
+                <button
+                    style={{ marginLeft: "auto" }}
+                    className={styles.buttonSecondary}
+                    type="button"
+                    onClick={saveStandingsAsJpeg}
+                >
+                    Save JPEG
+                </button>
             </div>
 
-            <div className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
+            <div ref={standingsExportRef} className={custStyles.tableWrap} style={{ marginBottom: 75 }}>
                 <table className={custStyles.table}>
                     <thead>
                         <tr>
                             <th colSpan={4} className={custStyles.favoritesHeader}>{selectedClass}</th>
                             <th
                                 colSpan={2}
-                                className={custStyles.favoritesHeader}
+                                className={`${custStyles.favoritesHeader} exportInfoHeader`}
                                 style={{
                                     fontSize: 14,
                                     fontWeight: "normal",
@@ -458,7 +581,7 @@ export default function StandingsPage() {
                             <th style={{ textAlign: "center" }}>Competitor/Team</th>
                             <th style={{ textAlign: "center" }}>Points</th>
                             <th style={{ textAlign: "center" }}>Earnings</th>
-                            <th style={{ textAlign: "center", width: 40 }}></th>
+                            <th className="historyColumn" style={{ textAlign: "center", width: 40 }}></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -510,17 +633,19 @@ export default function StandingsPage() {
                                             )}
                                         </td>
                                         <td style={{ textAlign: "center" }}>${row.total_pay}</td>
-                                        <td className={custStyles.right} style={{ width: 40 }}>
-                                            <button
-                                                className={styles.iconButton}
-                                                onClick={() =>
-                                                    router.push(`/driver-history/${selectedSeasonId}/${row.season_class_car_id}`)
-                                                }
-                                                aria-label="See driver history"
-                                                title="See driver's events"
-                                            >
-                                                <History size={16} />
-                                            </button>
+                                        <td className={`${custStyles.right} historyColumn`} style={{ width: 40 }}>
+                                            {selectedClassId !== COMBINED_BTP_NAME && (
+                                                <button
+                                                    className={styles.iconButton}
+                                                    onClick={() =>
+                                                        router.push(`/driver-history/${selectedSeasonId}/${row.season_class_car_id}`)
+                                                    }
+                                                    aria-label="See driver history"
+                                                    title="See driver's events"
+                                                >
+                                                    <History size={16} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 );
